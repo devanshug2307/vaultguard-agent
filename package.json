@@ -1,0 +1,28 @@
+{
+  "name": "project3-vaultguard",
+  "version": "1.0.0",
+  "description": "> Think privately. Act publicly. Prove everything.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devanshug2307/vaultguard-agent.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/devanshug2307/vaultguard-agent/issues"
+  },
+  "homepage": "https://github.com/devanshug2307/vaultguard-agent#readme",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.2",
+    "@openzeppelin/contracts": "^5.6.1",
+    "hardhat": "^2.28.6"
+  }
+}
