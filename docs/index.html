@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VaultGuard — Private AI Reasoning Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'SF Mono',monospace;background:#0a0a0f;color:#e0e0e0;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a1a2e,#0f3460);border-bottom:1px solid #2a2a4a;padding:24px 32px}
+.header h1{font-size:28px;color:#e94560;margin-bottom:4px}
+.header p{color:#888;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;padding:24px 32px;max-width:1200px;margin:0 auto}
+.card{background:#12121f;border:1px solid #2a2a4a;border-radius:12px;padding:24px}
+.card h2{font-size:14px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px}
+.stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1a1a2f}
+.stat-row:last-child{border-bottom:none}
+.stat-label{color:#888}.stat-value{color:#e0e0e0;font-weight:bold}
+.red{color:#e94560}.green{color:#00ff88}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;background:#330011;color:#e94560}
+.full-width{grid-column:1/-1}
+.privacy-flow{text-align:center;padding:20px;color:#e94560;font-size:13px;line-height:2}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>VaultGuard <span style="color:#444">|</span> Private AI Reasoning</h1>
+<p>Think privately. Act publicly. Prove everything. Built for The Synthesis 2026.</p>
+</div>
+<div class="grid">
+<div class="card">
+<h2>Privacy Model</h2>
+<div class="stat-row"><span class="stat-label">Input Data</span><span class="stat-value red">HASHED (SHA-256)</span></div>
+<div class="stat-row"><span class="stat-label">Reasoning</span><span class="stat-value red">IN-MEMORY ONLY</span></div>
+<div class="stat-row"><span class="stat-label">Output</span><span class="stat-value green">PUBLIC-SAFE</span></div>
+<div class="stat-row"><span class="stat-label">Verification</span><span class="stat-value green">Hash-based proof</span></div>
+<div class="stat-row"><span class="stat-label">LLM Provider</span><span class="stat-value">Venice (zero storage)</span></div>
+</div>
+<div class="card">
+<h2>Reasoning Sessions</h2>
+<div class="stat-row"><span class="stat-label">Treasury Strategy</span><span class="stat-value">4 actions generated</span></div>
+<div class="stat-row"><span class="stat-label">Governance Analysis</span><span class="stat-value">3 actions generated</span></div>
+<div class="stat-row"><span class="stat-label">Deal Evaluation</span><span class="stat-value">3 actions generated</span></div>
+<div class="stat-row"><span class="stat-label">Total Sessions</span><span class="stat-value">3</span></div>
+<div class="stat-row"><span class="stat-label">Data Exposed</span><span class="stat-value red">ZERO</span></div>
+</div>
+<div class="card full-width">
+<h2>Privacy Flow</h2>
+<div class="privacy-flow">
+Sensitive Input → <span style="color:#444">SHA-256 Hash</span> → Private Reasoning (in-memory) → <span style="color:#444">Reasoning Hash</span> → Public Actions Only → <span style="color:#00ff88">Verification Proof</span>
+</div>
+</div>
+</div>
+<div style="text-align:center;padding:32px;color:#444;font-size:12px">
+VaultGuard — The Synthesis 2026 — Built by Devanshu Goyal<br>
+<a href="https://github.com/devanshug2307/vaultguard-agent" style="color:#4a9eff" target="_blank">GitHub</a>
+</div>
+</body>
+</html>
