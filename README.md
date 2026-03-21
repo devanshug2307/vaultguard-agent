@@ -132,11 +132,11 @@ Every session generates verifiable proof:
 - Specific actions were generated
 - All without revealing the private data
 
-## Deployed Contract
+## Deployed Contract (Base Sepolia)
 
 | Contract | Network | Address |
 |----------|---------|---------|
-| PrivacyVault | Base Sepolia | [`0xE3321EFC6E1A8B27D2c9d261504b974E927Df4C2`](https://sepolia.basescan.org/address/0xE3321EFC6E1A8B27D2c9d261504b974E927Df4C2) |
+| PrivacyVault | Base Sepolia | [`0x3AeDD41999383E9a351B0Cb984D5Bb8eac3AAB28`](https://sepolia.basescan.org/address/0x3AeDD41999383E9a351B0Cb984D5Bb8eac3AAB28) |
 
 ## Onchain Proof
 
@@ -144,10 +144,10 @@ Every private reasoning session is committed onchain with hashes (never raw data
 
 | # | Action | TX Hash |
 |---|--------|---------|
-| 1 | Deploy PrivacyVault | [`0xe46c6f...`](https://sepolia.basescan.org/tx/0xe46c6f664111b27eaaf89cbf5cf426d18fded233f78316358a900e4d52cc596f) |
-| 2 | Treasury Strategy (private reasoning) | [`0xd7dae8...`](https://sepolia.basescan.org/tx/0xd7dae894626d517cdac4283ccddba3e0d015cdd143d9389f7ad1829f5d90179c) |
-| 3 | Governance Deliberation (private reasoning) | [`0xe42552...`](https://sepolia.basescan.org/tx/0xe4255220393431de69d1fb61a5d96d43b10d82692a115d3a46f501aa963d2225) |
-| 4 | Deal Evaluation (private reasoning) | [`0xaa83b5...`](https://sepolia.basescan.org/tx/0xaa83b508c19a14bc8592390a4a4a7545e8bcc2e2738e16e438a2c5cf97ecff4b) |
+| 1 | Deploy PrivacyVault | [`0xee4682...`](https://sepolia.basescan.org/tx/0xee46829d529cb951926004d27db53976bee4185e211aca218f8e3cf53eb77d23) |
+| 2 | Treasury Strategy (private reasoning) | [`0x7c4ece...`](https://sepolia.basescan.org/tx/0x7c4ece9c262798a03bace90a41a237ba7827d912515210e14d6db596aabc0896) |
+| 3 | Governance Deliberation (private reasoning) | [`0x91b5d2...`](https://sepolia.basescan.org/tx/0x91b5d2b5bb6e0164b1c0c8fcba8f2c28bc39041d6511269447e990cf4ffa5c76) |
+| 4 | Deal Evaluation (private reasoning) | [`0x8455a8...`](https://sepolia.basescan.org/tx/0x8455a8616f543d0ef0dd77ee751d24ae2fd32f44b53616ecdb006fa9f546f242) |
 
 ## Tests
 
