@@ -2,16 +2,22 @@
 """
 VaultGuard CLI Agent
 =====================
-Command-line interface for running VaultGuard private reasoning sessions.
+Command-line interface for running VaultGuard private reasoning sessions,
+powered by the MoonPay CLI as its primary crypto action layer.
 
 Supports:
   - Private portfolio / treasury analysis
   - Governance proposal deliberation
   - Deal evaluation
   - Session verification and proof export
+  - Live wallet balances via MoonPay CLI (mp mcp)
+  - Token swaps and cross-chain bridges via MoonPay CLI
+  - Token discovery and market data via MoonPay CLI
+  - Prediction market operations via MoonPay CLI
 
-Designed for the MoonPay CLI track — a crypto-native CLI agent that performs
-private analysis of portfolios and outputs public-safe recommendations.
+The MoonPay CLI runs as an MCP server (`mp mcp`) and VaultGuard communicates
+with it over stdio JSON-RPC 2.0. All sensitive data stays in VaultGuard's
+private reasoning layer; only public-safe actions are forwarded to MoonPay.
 
 Usage:
     python cli_agent.py analyze --task treasury_strategy --data "Portfolio: ..."
@@ -19,14 +25,21 @@ Usage:
     python cli_agent.py verify  --session-id vg-0001-185954
     python cli_agent.py report
     python cli_agent.py describe
+    python cli_agent.py moonpay-status
+    python cli_agent.py balances --wallet 0x... --chain ethereum
+    python cli_agent.py swap --wallet main --chain ethereum --from ETH --to USDC --amount 0.1
+    python cli_agent.py portfolio-live --wallet 0x... --chains ethereum,base,polygon
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 import os
+import shutil
+import threading
 from datetime import datetime
 from typing import Optional
 
@@ -37,10 +50,305 @@ from private_reasoner import PrivateReasoner, PrivateReasoning
 
 
 # ---------------------------------------------------------------------------
-# Shared reasoner instance (persists across commands in interactive mode)
+# MoonPay CLI MCP Bridge
+# ---------------------------------------------------------------------------
+
+class MoonPayMCPBridge:
+    """
+    Bridge to the MoonPay CLI running as an MCP server.
+
+    Spawns `mp mcp` as a child process and communicates via JSON-RPC 2.0
+    over stdio (Content-Length framed messages). Provides typed Python
+    methods for wallet balances, token swaps, bridges, market data, and
+    prediction market operations.
+
+    Privacy model:
+      - VaultGuard never sends raw sensitive data to MoonPay
+      - MoonPay is used only for public on-chain actions (balances, swaps)
+      - Private reasoning stays in PrivateReasoner (hashed, in-memory only)
+    """
+
+    MCP_PROTOCOL_VERSION = "2024-11-05"
+
+    def __init__(self):
+        self._process: Optional[subprocess.Popen] = None
+        self._request_id = 0
+        self._buffer = ""
+        self._connected = False
+        self._lock = threading.Lock()
+
+    @property
+    def connected(self) -> bool:
+        return self._connected
+
+    @staticmethod
+    def is_available() -> bool:
+        """Check if the MoonPay CLI (`mp`) is installed."""
+        return shutil.which("mp") is not None
+
+    def connect(self) -> bool:
+        """
+        Spawn `mp mcp` and perform the MCP handshake.
+        Returns True if connected, False on error.
+        """
+        if not self.is_available():
+            return False
+
+        try:
+            self._process = subprocess.Popen(
+                ["mp", "mcp"],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+
+            # MCP initialize handshake
+            result = self._request("initialize", {
+                "protocolVersion": self.MCP_PROTOCOL_VERSION,
+                "clientInfo": {
+                    "name": "vaultguard-cli-agent",
+                    "version": "1.0.0",
+                },
+                "capabilities": {},
+            })
+
+            # Send initialized notification
+            self._notify("notifications/initialized", {})
+
+            self._connected = result is not None
+            return self._connected
+
+        except (OSError, FileNotFoundError):
+            self._connected = False
+            return False
+
+    def disconnect(self):
+        """Shut down the MCP server process."""
+        if self._process:
+            try:
+                self._process.terminate()
+                self._process.wait(timeout=5)
+            except Exception:
+                self._process.kill()
+            self._process = None
+        self._connected = False
+
+    # -- MoonPay tool wrappers -----------------------------------------------
+
+    def call_tool(self, tool_name: str, arguments: dict) -> dict:
+        """Call any MoonPay MCP tool by name."""
+        result = self._request("tools/call", {
+            "name": tool_name,
+            "arguments": arguments,
+        })
+        return self._parse_tool_result(result)
+
+    def list_tools(self) -> list:
+        """List all available MCP tools from the MoonPay server."""
+        result = self._request("tools/list", {})
+        if result and isinstance(result, dict):
+            return result.get("tools", [])
+        return []
+
+    def get_balances(self, wallet: str, chain: str) -> dict:
+        """Fetch token balances for a wallet on a given chain."""
+        return self.call_tool("token_balance_list", {
+            "wallet": wallet,
+            "chain": chain,
+        })
+
+    def get_multi_chain_balances(self, wallet: str, chains: list[str]) -> dict:
+        """Fetch balances across multiple chains."""
+        all_balances = {}
+        for chain in chains:
+            try:
+                all_balances[chain] = self.get_balances(wallet, chain)
+            except Exception as e:
+                all_balances[chain] = {"error": str(e)}
+        return all_balances
+
+    def swap_tokens(self, wallet: str, chain: str,
+                    from_token: str, to_token: str,
+                    amount: str) -> dict:
+        """Swap tokens on the same chain."""
+        return self.call_tool("token_swap", {
+            "wallet": wallet,
+            "chain": chain,
+            "from_token": from_token,
+            "to_token": to_token,
+            "from_amount": amount,
+        })
+
+    def bridge_tokens(self, wallet: str, from_chain: str, to_chain: str,
+                      from_token: str, to_token: str,
+                      amount: str) -> dict:
+        """Bridge tokens across chains."""
+        return self.call_tool("token_bridge", {
+            "from_wallet": wallet,
+            "from_chain": from_chain,
+            "from_token": from_token,
+            "from_amount": amount,
+            "to_chain": to_chain,
+            "to_token": to_token,
+        })
+
+    def search_tokens(self, query: str, chain: str) -> dict:
+        """Search for tokens by name or symbol."""
+        return self.call_tool("token_search", {
+            "query": query,
+            "chain": chain,
+        })
+
+    def get_trending_tokens(self, chain: str) -> dict:
+        """Get trending tokens on a chain."""
+        return self.call_tool("token_trending_list", {
+            "chain": chain,
+        })
+
+    def search_prediction_markets(self, query: str,
+                                  provider: str = "polymarket") -> dict:
+        """Search prediction markets."""
+        return self.call_tool("prediction_market_market_search", {
+            "provider": provider,
+            "query": query,
+        })
+
+    def get_trending_markets(self, provider: str = "polymarket",
+                             limit: int = 10) -> dict:
+        """Get trending prediction markets."""
+        return self.call_tool("prediction_market_market_trending_list", {
+            "provider": provider,
+            "limit": limit,
+        })
+
+    # -- JSON-RPC transport --------------------------------------------------
+
+    def _next_id(self) -> int:
+        with self._lock:
+            self._request_id += 1
+            return self._request_id
+
+    def _request(self, method: str, params: dict) -> Optional[dict]:
+        """Send a JSON-RPC request and wait for the response."""
+        if not self._process:
+            return None
+
+        msg_id = self._next_id()
+        payload = json.dumps({
+            "jsonrpc": "2.0",
+            "id": msg_id,
+            "method": method,
+            "params": params,
+        })
+        frame = f"Content-Length: {len(payload.encode('utf-8'))}\r\n\r\n{payload}"
+
+        try:
+            self._process.stdin.write(frame.encode("utf-8"))
+            self._process.stdin.flush()
+            return self._read_response(msg_id)
+        except (BrokenPipeError, OSError):
+            self._connected = False
+            return None
+
+    def _notify(self, method: str, params: dict):
+        """Send a JSON-RPC notification (no response expected)."""
+        if not self._process:
+            return
+        payload = json.dumps({
+            "jsonrpc": "2.0",
+            "method": method,
+            "params": params,
+        })
+        frame = f"Content-Length: {len(payload.encode('utf-8'))}\r\n\r\n{payload}"
+        try:
+            self._process.stdin.write(frame.encode("utf-8"))
+            self._process.stdin.flush()
+        except (BrokenPipeError, OSError):
+            self._connected = False
+
+    def _read_response(self, expected_id: int, timeout: float = 30.0) -> Optional[dict]:
+        """Read a JSON-RPC response with Content-Length framing."""
+        if not self._process or not self._process.stdout:
+            return None
+
+        import select
+
+        deadline = __import__("time").time() + timeout
+
+        while __import__("time").time() < deadline:
+            # Try to read more data
+            ready, _, _ = select.select([self._process.stdout], [], [], 0.1)
+            if ready:
+                chunk = self._process.stdout.read1(4096) if hasattr(self._process.stdout, 'read1') else b""
+                if chunk:
+                    self._buffer += chunk.decode("utf-8", errors="replace")
+
+            # Try to parse a complete message from the buffer
+            while True:
+                sep = self._buffer.find("\r\n\r\n")
+                if sep < 0:
+                    break
+
+                header = self._buffer[:sep]
+                match = None
+                for line in header.split("\r\n"):
+                    if line.lower().startswith("content-length:"):
+                        try:
+                            match = int(line.split(":", 1)[1].strip())
+                        except ValueError:
+                            pass
+
+                if match is None:
+                    # Skip malformed header
+                    self._buffer = self._buffer[sep + 4:]
+                    continue
+
+                body_start = sep + 4
+                full_length = body_start + match
+
+                if len(self._buffer) < full_length:
+                    break  # Need more data
+
+                body = self._buffer[body_start:full_length]
+                self._buffer = self._buffer[full_length:]
+
+                try:
+                    msg = json.loads(body)
+                except json.JSONDecodeError:
+                    continue
+
+                if msg.get("id") == expected_id:
+                    if "error" in msg:
+                        raise RuntimeError(
+                            f"MoonPay MCP error: {msg['error'].get('message', msg['error'])}"
+                        )
+                    return msg.get("result")
+
+        return None
+
+    @staticmethod
+    def _parse_tool_result(result: Optional[dict]) -> dict:
+        """Parse MCP tool result, extracting text content if present."""
+        if result is None:
+            return {}
+        if isinstance(result, dict) and "content" in result:
+            content = result["content"]
+            if isinstance(content, list) and content:
+                first = content[0]
+                if isinstance(first, dict) and "text" in first:
+                    try:
+                        return json.loads(first["text"])
+                    except (json.JSONDecodeError, TypeError):
+                        return {"text": first["text"]}
+        return result if isinstance(result, dict) else {"raw": result}
+
+
+# ---------------------------------------------------------------------------
+# Shared instances (persist across commands in interactive mode)
 # ---------------------------------------------------------------------------
 
 _reasoner: Optional[PrivateReasoner] = None
+_moonpay: Optional[MoonPayMCPBridge] = None
 
 
 def get_reasoner(api_key: str = "") -> PrivateReasoner:
@@ -48,6 +356,14 @@ def get_reasoner(api_key: str = "") -> PrivateReasoner:
     if _reasoner is None:
         _reasoner = PrivateReasoner(api_key)
     return _reasoner
+
+
+def get_moonpay() -> MoonPayMCPBridge:
+    """Get or create the MoonPay MCP bridge (lazy connection)."""
+    global _moonpay
+    if _moonpay is None:
+        _moonpay = MoonPayMCPBridge()
+    return _moonpay
 
 
 # ---------------------------------------------------------------------------
@@ -175,29 +491,253 @@ def cmd_report(args):
 
 def cmd_describe(args):
     """Print agent capabilities (useful for MoonPay / Olas discovery)."""
-    print("""
+    mp = get_moonpay()
+    mp_status = "CONNECTED" if mp.connected else ("AVAILABLE (not connected)" if mp.is_available() else "NOT INSTALLED")
+
+    print(f"""
   VaultGuard CLI Agent
   ====================
   Privacy-preserving AI reasoning for crypto portfolios and DAO operations.
+  Powered by MoonPay CLI as the primary crypto action layer.
 
-  Capabilities:
+  MoonPay CLI Status: {mp_status}
+
+  Private Reasoning Capabilities:
     treasury_strategy    Analyze portfolio composition, recommend rebalancing
     governance_analysis  Evaluate governance proposals, output vote
     deal_evaluation      Assess deal terms, recommend negotiation position
 
-  Privacy model:
+  MoonPay CLI Capabilities (via MCP):
+    balances             Fetch live wallet balances across chains
+    swap                 Swap tokens on the same chain
+    bridge               Bridge tokens across chains
+    search               Search and discover tokens
+    trending             Find trending tokens and markets
+    prediction-markets   Trade on Polymarket and Kalshi
+    buy-crypto           Buy crypto with fiat
+
+  Privacy Model:
     - Input data: SHA-256 hashed, never stored
     - Reasoning: in-memory only, never persisted
     - Output: public-safe summaries and actions only
     - Proof: cryptographic hashes prove computation
+    - MoonPay: used only for public on-chain actions (no sensitive data sent)
 
-  Crypto operations:
-    - Portfolio analysis with private reasoning
-    - DAO treasury management
-    - Confidential deal evaluation
+  Supported Chains:
+    ethereum, base, polygon, arbitrum, optimism, solana, bnb, avalanche
 
-  Run 'vaultguard analyze --help' for usage details.
+  Run 'vaultguard --help' for all commands.
 """)
+
+
+def cmd_moonpay_status(args):
+    """Check MoonPay CLI availability and connection status."""
+    print(f"\n  MoonPay CLI Integration Status")
+    print(f"  {'=' * 42}\n")
+
+    # Check if mp binary is installed
+    mp_path = shutil.which("mp")
+    if mp_path:
+        print(f"  CLI binary:   FOUND at {mp_path}")
+    else:
+        print(f"  CLI binary:   NOT FOUND")
+        print(f"  Install with: npm install -g @moonpay/cli")
+        print(f"  Then run:     mp login --email <email>")
+        return
+
+    # Check version
+    try:
+        version_result = subprocess.run(
+            ["mp", "--version"], capture_output=True, text=True, timeout=5
+        )
+        version = version_result.stdout.strip() or "unknown"
+        print(f"  CLI version:  {version}")
+    except Exception:
+        print(f"  CLI version:  could not determine")
+
+    # Check authentication
+    try:
+        user_result = subprocess.run(
+            ["mp", "user", "retrieve"], capture_output=True, text=True, timeout=10
+        )
+        if user_result.returncode == 0:
+            print(f"  Auth status:  AUTHENTICATED")
+        else:
+            print(f"  Auth status:  NOT AUTHENTICATED")
+            print(f"  Run:          mp login --email <email>")
+    except Exception:
+        print(f"  Auth status:  could not determine")
+
+    # Check wallets
+    try:
+        wallet_result = subprocess.run(
+            ["mp", "wallet", "list"], capture_output=True, text=True, timeout=10
+        )
+        if wallet_result.returncode == 0 and wallet_result.stdout.strip():
+            print(f"  Wallets:      found")
+        else:
+            print(f"  Wallets:      none")
+            print(f"  Create with:  mp wallet create --name vaultguard")
+    except Exception:
+        print(f"  Wallets:      could not determine")
+
+    # Try MCP connection
+    print(f"\n  MCP Connection Test")
+    print(f"  {'-' * 42}")
+    mp = get_moonpay()
+    if mp.connect():
+        print(f"  MCP server:   CONNECTED (mp mcp)")
+
+        # List available tools
+        try:
+            tools = mp.list_tools()
+            if tools:
+                print(f"  Tools:        {len(tools)} available")
+                for tool in tools[:10]:
+                    name = tool.get("name", "unknown") if isinstance(tool, dict) else str(tool)
+                    print(f"                - {name}")
+                if len(tools) > 10:
+                    print(f"                ... and {len(tools) - 10} more")
+            else:
+                print(f"  Tools:        (could not enumerate)")
+        except Exception:
+            print(f"  Tools:        (could not enumerate)")
+
+        mp.disconnect()
+    else:
+        print(f"  MCP server:   COULD NOT CONNECT")
+        print(f"  The CLI is installed but `mp mcp` did not start.")
+        print(f"  Make sure you are authenticated: mp login --email <email>")
+
+    print()
+
+
+def cmd_balances(args):
+    """Fetch live wallet balances via MoonPay CLI."""
+    mp = get_moonpay()
+
+    if not mp.is_available():
+        print("  MoonPay CLI not installed. Run: npm install -g @moonpay/cli", file=sys.stderr)
+        sys.exit(1)
+
+    if not mp.connect():
+        print("  Could not connect to MoonPay MCP server.", file=sys.stderr)
+        print("  Make sure you are authenticated: mp login --email <email>", file=sys.stderr)
+        sys.exit(1)
+
+    wallet = args.wallet
+    chain = args.chain
+
+    print(f"\n  Wallet Balances (via MoonPay CLI)")
+    print(f"  {'=' * 42}")
+    print(f"  Wallet: {wallet}")
+    print(f"  Chain:  {chain}\n")
+
+    try:
+        result = mp.get_balances(wallet, chain)
+        if isinstance(result, dict) and "error" in result:
+            print(f"  Error: {result['error']}", file=sys.stderr)
+        else:
+            print(f"  {json.dumps(result, indent=2)}")
+    except Exception as e:
+        print(f"  Error: {e}", file=sys.stderr)
+    finally:
+        mp.disconnect()
+
+
+def cmd_swap(args):
+    """Execute a token swap via MoonPay CLI."""
+    mp = get_moonpay()
+
+    if not mp.is_available():
+        print("  MoonPay CLI not installed. Run: npm install -g @moonpay/cli", file=sys.stderr)
+        sys.exit(1)
+
+    if not mp.connect():
+        print("  Could not connect to MoonPay MCP server.", file=sys.stderr)
+        sys.exit(1)
+
+    # First resolve token symbols to addresses if needed
+    from_token = args.from_token
+    to_token = args.to_token
+
+    print(f"\n  Token Swap (via MoonPay CLI)")
+    print(f"  {'=' * 42}")
+    print(f"  Wallet:  {args.wallet}")
+    print(f"  Chain:   {args.chain}")
+    print(f"  From:    {from_token}")
+    print(f"  To:      {to_token}")
+    print(f"  Amount:  {args.amount}\n")
+
+    try:
+        result = mp.swap_tokens(
+            wallet=args.wallet,
+            chain=args.chain,
+            from_token=from_token,
+            to_token=to_token,
+            amount=args.amount,
+        )
+        print(f"  Result: {json.dumps(result, indent=2)}")
+    except Exception as e:
+        print(f"  Error: {e}", file=sys.stderr)
+    finally:
+        mp.disconnect()
+
+
+def cmd_portfolio_live(args):
+    """
+    Fetch live balances via MoonPay CLI, then run VaultGuard private analysis.
+    This is the key integration: live on-chain data + private reasoning.
+    """
+    reasoner = get_reasoner(args.api_key or "")
+    mp = get_moonpay()
+
+    chains = [c.strip() for c in args.chains.split(",")]
+    wallet = args.wallet
+
+    print(f"\n  VaultGuard Live Portfolio Analysis")
+    print(f"  {'=' * 42}")
+    print(f"  Wallet: {wallet}")
+    print(f"  Chains: {', '.join(chains)}")
+    print(f"  Privacy: full (balances hashed after fetch)\n")
+
+    # Step 1: Fetch live balances via MoonPay CLI
+    balances_data = {}
+    if mp.is_available() and mp.connect():
+        print(f"  [1/3] Fetching live balances via MoonPay CLI...")
+        try:
+            balances_data = mp.get_multi_chain_balances(wallet, chains)
+            print(f"        Fetched from {len(chains)} chain(s)")
+        except Exception as e:
+            print(f"        Warning: could not fetch live data ({e})")
+        finally:
+            mp.disconnect()
+    else:
+        print(f"  [1/3] MoonPay CLI not available, using provided data only")
+
+    # Step 2: Run private reasoning on the balance data
+    print(f"  [2/3] Running private analysis...")
+    sensitive_data = json.dumps({
+        "wallet": wallet,
+        "chains": chains,
+        "balances": balances_data if balances_data else "no live data available",
+        "request": "Analyze portfolio composition and recommend rebalancing strategy",
+    })
+
+    session = reasoner.reason_privately(sensitive_data, "treasury_strategy")
+
+    # Step 3: Output public-safe results
+    print(f"  [3/3] Analysis complete\n")
+    print(f"  Session:   {session.session_id}")
+    print(f"  Data hash: {session.input_hash[:32]}...")
+    print(f"  Proof:     {session.reasoning_hash[:32]}...")
+    print()
+    print(f"  Recommendations:")
+    for i, a in enumerate(session.output_actions, 1):
+        print(f"    {i}. {a}")
+    print()
+    print(f"  (Raw balances hashed and discarded -- only recommendations are public)")
+    print()
 
 
 # ---------------------------------------------------------------------------
@@ -207,7 +747,7 @@ def cmd_describe(args):
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="vaultguard",
-        description="VaultGuard — Private AI reasoning agent for crypto operations",
+        description="VaultGuard -- Private AI reasoning agent powered by MoonPay CLI",
     )
     parser.add_argument("--api-key", default="", help="Venice API key (or set VENICE_API_KEY)")
     sub = parser.add_subparsers(dest="command")
@@ -223,7 +763,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_analyze.add_argument("--output", "-o", help="Export proof JSON to this file")
     p_analyze.set_defaults(func=cmd_analyze)
 
-    # portfolio (shortcut)
+    # portfolio (shortcut -- manual entry)
     p_port = sub.add_parser("portfolio", help="Quick private portfolio analysis")
     p_port.add_argument("holdings", nargs="*", help="e.g. '40%% ETH' '30%% BTC' '30%% USDC'")
     p_port.set_defaults(func=cmd_portfolio)
@@ -240,6 +780,37 @@ def build_parser() -> argparse.ArgumentParser:
     # describe
     p_desc = sub.add_parser("describe", help="Show agent capabilities")
     p_desc.set_defaults(func=cmd_describe)
+
+    # --- MoonPay CLI integration commands ---
+
+    # moonpay-status
+    p_mp_status = sub.add_parser("moonpay-status",
+                                 help="Check MoonPay CLI installation and MCP connection")
+    p_mp_status.set_defaults(func=cmd_moonpay_status)
+
+    # balances (via MoonPay CLI)
+    p_bal = sub.add_parser("balances", help="Fetch live wallet balances via MoonPay CLI")
+    p_bal.add_argument("--wallet", required=True, help="Wallet name or address")
+    p_bal.add_argument("--chain", required=True,
+                       help="Chain name (ethereum, base, polygon, solana, ...)")
+    p_bal.set_defaults(func=cmd_balances)
+
+    # swap (via MoonPay CLI)
+    p_swap = sub.add_parser("swap", help="Swap tokens via MoonPay CLI")
+    p_swap.add_argument("--wallet", required=True, help="Wallet name")
+    p_swap.add_argument("--chain", required=True, help="Chain name")
+    p_swap.add_argument("--from-token", required=True, help="Source token address")
+    p_swap.add_argument("--to-token", required=True, help="Target token address")
+    p_swap.add_argument("--amount", required=True, help="Amount to swap")
+    p_swap.set_defaults(func=cmd_swap)
+
+    # portfolio-live (MoonPay CLI + private reasoning)
+    p_live = sub.add_parser("portfolio-live",
+                            help="Fetch live balances via MoonPay, then analyze privately")
+    p_live.add_argument("--wallet", required=True, help="Wallet name or address")
+    p_live.add_argument("--chains", default="ethereum,base,polygon",
+                        help="Comma-separated chain names")
+    p_live.set_defaults(func=cmd_portfolio_live)
 
     return parser
 
