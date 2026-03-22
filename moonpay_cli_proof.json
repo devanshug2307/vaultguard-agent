@@ -1,0 +1,174 @@
+{
+  "proof_type": "moonpay_cli_installation_and_test",
+  "timestamp": "2026-03-22T07:08:00Z",
+  "agent": "VaultGuard CLI Agent",
+  "track": "MoonPay CLI ($3,500)",
+
+  "installation": {
+    "command": "npm install -g @moonpay/cli",
+    "result": "SUCCESS",
+    "package": "@moonpay/cli",
+    "packages_installed": 457
+  },
+
+  "binary": {
+    "mp_path": "/usr/local/bin/mp",
+    "moonpay_path": "/usr/local/bin/moonpay",
+    "version": "1.12.4",
+    "both_binaries_available": true
+  },
+
+  "consent": {
+    "accepted": true,
+    "tos_version": "1.2",
+    "accepted_at": "2026-03-22T07:07:53.562Z"
+  },
+
+  "mcp_server": {
+    "command": "mp mcp",
+    "protocol": "JSON-RPC 2.0 over stdio",
+    "test_result": "SUCCESS",
+    "initialize_response": {
+      "protocolVersion": "2024-11-05",
+      "capabilities": {
+        "tools": {
+          "listChanged": true
+        }
+      },
+      "serverInfo": {
+        "name": "moonpay",
+        "version": "1.12.4"
+      }
+    }
+  },
+
+  "tools_available": {
+    "total_count": 92,
+    "categories": [
+      "wallet (create, import, list, retrieve, delete, rename, export, discover, pnl, activity, hardware)",
+      "token (search, swap, bridge, transfer, check, retrieve, trending, balance, holder)",
+      "transaction (list, retrieve, send, sign)",
+      "commerce (checkout, cart, product, store)",
+      "prediction-market (search, trending, buy, sell, redeem, positions, trades, pnl, activity)",
+      "virtual-account (create, kyc, bank-account, onramp, offramp, wallet, transactions, agreements)",
+      "bitcoin (balance)",
+      "deposit (create, retrieve, transactions)",
+      "buy (crypto with fiat)",
+      "message (sign)",
+      "skill (install, list, retrieve)",
+      "x402 (request)",
+      "consent (accept, check)",
+      "feedback (create)",
+      "login, verify, logout, refresh, upgrade"
+    ]
+  },
+
+  "live_api_tests": {
+    "token_search": {
+      "command": "mp token search --query ETH --chain ethereum --json",
+      "result": "SUCCESS",
+      "sample": {
+        "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+        "name": "Wrapped ETH",
+        "symbol": "WETH",
+        "chain": "ethereum",
+        "price_usd": 2110.62,
+        "liquidity": 58379227,
+        "market_cap": 4848334823,
+        "volume_24h": 122629386,
+        "trades_24h": 6560
+      }
+    },
+    "token_check": {
+      "command": "mp token check --token 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 --chain ethereum --json",
+      "result": "SUCCESS",
+      "sample": {
+        "token": "WETH",
+        "chain": "ethereum",
+        "community_notes": [],
+        "risks": ["Unable to retrieve liquidity data"]
+      }
+    },
+    "token_trending": {
+      "command": "mp token trending list --chain ethereum --limit 3 --page 1 --json",
+      "result": "SUCCESS",
+      "sample_tokens": [
+        {"symbol": "USR", "name": "Resolv USD", "chain": "ethereum"},
+        {"symbol": "LINK", "name": "ChainLink Token", "chain": "ethereum"}
+      ]
+    },
+    "wallet_list": {
+      "command": "mp wallet list --json",
+      "result": "SUCCESS",
+      "wallets": []
+    },
+    "skill_list": {
+      "command": "mp skill list",
+      "result": "SUCCESS",
+      "skills_count": 20,
+      "skill_names": [
+        "moonpay-auth",
+        "moonpay-block-explorer",
+        "moonpay-buy-crypto",
+        "moonpay-check-wallet",
+        "moonpay-commerce",
+        "moonpay-deposit",
+        "moonpay-discover-tokens",
+        "moonpay-export-data",
+        "moonpay-feedback",
+        "moonpay-fund-polymarket",
+        "moonpay-hardware-wallet",
+        "moonpay-mcp",
+        "moonpay-missions",
+        "moonpay-prediction-market",
+        "moonpay-price-alerts",
+        "moonpay-swap-tokens",
+        "moonpay-trading-automation",
+        "moonpay-upgrade",
+        "moonpay-virtual-account",
+        "moonpay-x402"
+      ]
+    }
+  },
+
+  "vaultguard_integration": {
+    "cli_agent_file": "src/cli_agent.py",
+    "bridge_class": "MoonPayMCPBridge",
+    "bridge_capabilities": [
+      "is_available() - checks if mp binary exists",
+      "connect() - spawns mp mcp and performs MCP handshake",
+      "list_tools() - enumerates all MCP tools",
+      "get_balances() - fetch wallet token balances",
+      "get_multi_chain_balances() - multi-chain portfolio scan",
+      "swap_tokens() - same-chain token swap",
+      "bridge_tokens() - cross-chain token bridge",
+      "search_tokens() - token discovery",
+      "get_trending_tokens() - trending token feeds",
+      "search_prediction_markets() - prediction market search",
+      "get_trending_markets() - trending markets",
+      "call_tool() - generic tool invocation"
+    ],
+    "cli_commands": [
+      "moonpay-status - checks CLI installation and MCP connection",
+      "balances - live wallet balances via MoonPay CLI",
+      "swap - token swaps via MoonPay CLI",
+      "portfolio-live - live balances + private reasoning"
+    ],
+    "moonpay_status_test": {
+      "binary_found": true,
+      "version_detected": "1.12.4",
+      "auth_status": "NOT AUTHENTICATED (login required for wallet operations)",
+      "wallets_detected": true
+    }
+  },
+
+  "summary": {
+    "cli_installed": true,
+    "cli_functional": true,
+    "mcp_server_works": true,
+    "live_api_calls_work": true,
+    "92_tools_available": true,
+    "vaultguard_bridge_class_exists": true,
+    "authentication_needed_for": "wallet operations, swaps, bridges (mp login --email <email>)"
+  }
+}

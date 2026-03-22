@@ -190,6 +190,15 @@ python3 src/commerce_privacy.py
 
 Full command-line interface for running VaultGuard from the terminal — crypto-native portfolio analysis with private reasoning. The CLI uses `MoonPayMCPBridge` to communicate with the MoonPay CLI (`mp mcp`) over stdio JSON-RPC 2.0, combining live on-chain data with private reasoning.
 
+**MoonPay CLI verified working:**
+- **Version:** 1.12.4 (`npm install -g @moonpay/cli`)
+- **Binaries:** `mp` and `moonpay` at `/usr/local/bin/`
+- **MCP Server:** Responds to JSON-RPC 2.0 `initialize` over stdio
+- **Tools:** 92 tools across wallets, tokens, swaps, bridges, commerce, prediction markets, virtual accounts
+- **Live API:** Token search, trending, and safety checks return real market data (no auth required)
+- **Skills:** 20 AI skills for Claude Code (`mp skill list`)
+- **Proof:** See [`moonpay_cli_proof.json`](moonpay_cli_proof.json) for full installation and test results
+
 **Privacy model:** VaultGuard never sends raw sensitive data to MoonPay. MoonPay is used only for public on-chain actions (balances, swaps). Private reasoning stays in the `PrivateReasoner` (hashed, in-memory only).
 
 **Commands:**
@@ -330,6 +339,7 @@ vaultguard-agent/
 ├── agent_log.json                    # Full agent activity log
 ├── privacy_proof.json                # Proof of private computation
 ├── ens_proof.json                    # Proof of real ENS resolution (mainnet RPC)
+├── moonpay_cli_proof.json            # Proof of MoonPay CLI v1.12.4 install + 92 tools verified
 ├── hardhat.config.cjs
 ├── README.md
 └── requirements.txt
