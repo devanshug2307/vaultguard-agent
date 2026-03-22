@@ -1,0 +1,64 @@
+{
+  "name": "VaultGuard",
+  "description": "Privacy-preserving AI reasoning agent. Analyzes sensitive treasury, governance, and deal data privately and produces public-safe outputs with cryptographic proof of computation.",
+  "version": "1.0.0",
+  "author": "devanshu",
+  "homepage": "https://github.com/devanshug2307/vaultguard-agent",
+  "service_type": "ai_reasoning",
+  "capabilities": [
+    {
+      "id": "treasury_strategy",
+      "name": "Private Treasury Analysis",
+      "description": "Analyze portfolio composition and recommend rebalancing \u2014 privately.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "portfolio_data": {
+            "type": "string"
+          }
+        }
+      },
+      "output": "Public-safe actions + SHA-256 proof"
+    },
+    {
+      "id": "governance_analysis",
+      "name": "Private Governance Deliberation",
+      "description": "Evaluate governance proposals privately, output only the vote.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "proposal_data": {
+            "type": "string"
+          }
+        }
+      },
+      "output": "Vote recommendation + proof"
+    },
+    {
+      "id": "deal_evaluation",
+      "name": "Private Deal Evaluation",
+      "description": "Evaluate term sheets privately, recommend public terms.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "deal_data": {
+            "type": "string"
+          }
+        }
+      },
+      "output": "Term recommendation + proof"
+    }
+  ],
+  "pricing": {
+    "model": "per_session",
+    "base_price_wei": 1000000000000000,
+    "currency": "ETH",
+    "chain": "base"
+  },
+  "privacy_guarantees": [
+    "Input data is SHA-256 hashed \u2014 never stored in plaintext",
+    "Reasoning is in-memory only \u2014 never persisted",
+    "Venice API zero-storage inference when available",
+    "Hash-based cryptographic proof of computation"
+  ]
+}
