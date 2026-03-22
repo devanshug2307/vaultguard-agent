@@ -1,0 +1,106 @@
+{
+  "agent_name": "VaultGuard",
+  "version": "1.0.0",
+  "description": "Private AI reasoning agent with public verifiable actions. Separates sensitive reasoning from public outputs using hash-based cryptographic proofs. Think privately, act publicly, prove everything.",
+  "erc8004_identity": {
+    "standard": "ERC-8004",
+    "registration_tx": "https://basescan.org/tx/0x9890894365098da23a347ba828bab3c6f01b6fd6307e914297be5801e7b36282",
+    "chain": "Base Mainnet",
+    "chain_id": 8453
+  },
+  "operator": {
+    "wallet": "0x54eeFbb7b3F701eEFb7fa99473A60A6bf5fE16D7",
+    "name": "Devanshu Goyal",
+    "contact": "https://x.com/devanshugoyal23"
+  },
+  "supported_tools": [
+    {
+      "name": "reason_privately",
+      "description": "Reason over sensitive data privately — input hashed, reasoning in-memory only, output public-safe",
+      "source": "src/private_reasoner.py",
+      "protocol": "internal",
+      "privacy_modes": ["full", "hash_only"]
+    },
+    {
+      "name": "verify_session",
+      "description": "Verify a private reasoning session's integrity via hash chain validation",
+      "source": "src/private_reasoner.py",
+      "protocol": "internal"
+    },
+    {
+      "name": "commitSession",
+      "description": "Commit private reasoning session hashes to on-chain PrivacyVault (never raw data)",
+      "source": "contracts/PrivacyVault.sol",
+      "protocol": "on-chain"
+    },
+    {
+      "name": "verifySession",
+      "description": "Verify on-chain that a session hash matches the committed proof",
+      "source": "contracts/PrivacyVault.sol",
+      "protocol": "on-chain"
+    },
+    {
+      "name": "getSessionCount",
+      "description": "Query how many private reasoning sessions have been committed on-chain",
+      "source": "contracts/PrivacyVault.sol",
+      "protocol": "on-chain"
+    },
+    {
+      "name": "venice_chat",
+      "description": "Zero-storage LLM inference via Venice API — provider retains nothing",
+      "source": "src/private_reasoner.py",
+      "protocol": "REST",
+      "api": "https://api.venice.ai/api/v1/chat/completions"
+    }
+  ],
+  "tech_stack": {
+    "runtime": "Python 3.12 + Node.js",
+    "smart_contracts": "Solidity 0.8.x (Hardhat)",
+    "privacy_inference": "Venice API (zero-storage, Llama 3.3 70B)",
+    "cryptography": "SHA-256 hash chains for proof generation",
+    "chains": ["Base Sepolia", "Base Mainnet (ERC-8004)"],
+    "protocols": ["ERC-8004", "Venice Privacy API"],
+    "testing": "Hardhat + 13 Solidity tests",
+    "web3_library": "ethers.js"
+  },
+  "smart_contracts": {
+    "PrivacyVault": {
+      "network": "Base Sepolia",
+      "address": "0x3AeDD41999383E9a351B0Cb984D5Bb8eac3AAB28",
+      "verified": true,
+      "functions": [
+        "commitSession(bytes32,bytes32,string)",
+        "verifySession(uint256,bytes32)",
+        "getSessionCount()"
+      ]
+    }
+  },
+  "compute_constraints": {
+    "inference_provider": "Venice API (zero-storage)",
+    "models": ["llama-3.3-70b"],
+    "privacy_guarantee": "Even the LLM provider retains nothing — no logs, no training data, no traces",
+    "hash_algorithm": "SHA-256",
+    "reasoning_storage": "in-memory only — never persisted to disk",
+    "on_chain_data": "hashes only — raw data never touches the blockchain"
+  },
+  "task_categories": [
+    "private_treasury_strategy",
+    "private_governance_deliberation",
+    "private_deal_evaluation",
+    "hash_based_verification",
+    "on_chain_proof_commitment",
+    "zero_knowledge_reasoning"
+  ],
+  "privacy_model": {
+    "input": "SHA-256 hashed — proves what was analyzed without revealing it",
+    "reasoning": "in-memory only — never persisted, never stored",
+    "output": "public-safe summaries and actions only",
+    "proof": "cryptographic hash chain — proves computation happened honestly",
+    "on_chain": "hashes committed to PrivacyVault — verifiable without revealing content"
+  },
+  "links": {
+    "dashboard": "https://devanshug2307.github.io/vaultguard-agent/",
+    "github": "https://github.com/devanshug2307/vaultguard-agent",
+    "privacy_vault": "https://sepolia.basescan.org/address/0x3AeDD41999383E9a351B0Cb984D5Bb8eac3AAB28"
+  }
+}
