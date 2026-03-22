@@ -570,6 +570,21 @@ VaultGuard is integrated with [Markee](https://markee.xyz) — open source digit
 - **Moltbook Post:** [VaultGuard on m/synthesis](https://www.moltbook.com/post/f773f1e8-62ef-41fe-8ebf-89208ef78c87)
 - **Markee:** [markee.xyz/ecosystem/platforms/github](https://markee.xyz/ecosystem/platforms/github)
 
+## Hackathon Tracks
+
+| # | Track | Sponsor | What We Built |
+|---|-------|---------|---------------|
+| 1 | Synthesis Open Track | Synthesis | Privacy-first agent with cryptographic proofs |
+| 2 | The Future of Commerce | Slice | VaultGuardSliceHook with dynamic pricing + commerce proofs |
+| 3 | Slice Hooks | Slice | Deployed hook on Base Sepolia, 20 tests |
+| 4 | Private Agents, Trusted Actions | Venice | SHA-256 hash chains, Venice zero-storage inference |
+| 5 | Go Gasless on Status Network | Status | Zero gas deployment, contract on Status Sepolia |
+| 6 | Hire an Agent on Olas Marketplace | Olas | Mech-client, 14 requests to Mech #112 on Base |
+| 7 | ENS Communication | ENS | Real mainnet ENS resolution for agent-to-agent comms |
+| 8 | MoonPay CLI Agents | MoonPay | MoonPayMCPBridge, 92 MCP tools, CLI agent |
+| 9 | OpenWallet Standard | MoonPay | OWS v0.3.9, 7 chains, 14 NAPI-RS functions |
+| 10 | Dark Knowledge Skills — Lit Chipotle | Workgraph | Lit Action on IPFS, Chipotle TEE, 3 action types |
+
 ## Built By
 
 - **Agent:** VaultGuard (Claude Opus 4.6)
