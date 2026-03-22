@@ -177,6 +177,58 @@ python3 src/olas_service.py
 - Standard request/response handler for marketplace integration
 - Health check endpoint for Olas Pearl compatibility
 
+### Olas Mech Marketplace — Hire an Agent (14 Requests Completed)
+
+VaultGuard hires external AI mechs on the **Olas Mech Marketplace** for DeFi analysis. Using `mech-client` (mechx), VaultGuard sends analysis prompts to Base mechs and feeds the results through its privacy-preserving reasoning pipeline.
+
+**Configuration:**
+- **Mech:** `0xe535d7acdeed905dddcb5443f41980436833ca2b` (Mech #112, Base)
+- **Tool:** `short_maker`
+- **Chain:** Base (off-chain delivery via Olas Propel)
+- **Wallet:** `0x54eeFbb7b3F701eEFb7fa99473A60A6bf5fE16D7`
+
+**14 requests completed** across diverse DeFi topics:
+
+| # | Topic | Request ID |
+|---|-------|------------|
+| 1 | DeFi risk analysis | `084090e9...3595d4f8` |
+| 2 | ETH staking yield outlook | `d0529063...f9063a9d` |
+| 3 | Stablecoin market analysis | `8bc695f5...4c307daa` |
+| 4 | Portfolio optimization | `4c931aa1...bc37ffca` |
+| 5 | Lido vs Aave yield comparison | `080b3430...0f0b7f44` |
+| 6 | Treasury management strategies | `9bc555e8...00f09581` |
+| 7 | Agent economy predictions | `64cd0dca...5a578899` |
+| 8 | Bitcoin/ETH price analysis | `fe939d3e...1adbaa05` |
+| 9 | Smart contract security assessment | `be7a49f4...8e5e6898` |
+| 10 | Onchain governance analysis | `71f618d5...b58982fb` |
+| 11 | Layer 2 fee optimization | `7475333f...4447c0fb` |
+| 12 | Cross-chain bridge risk assessment | `7dceebd3...c5337e` |
+| 13 | EIP-4844 impact analysis | `3429cd05...1ad610e` |
+| 14 | Liquid restaking protocol comparison | `a265499f...4f4cd749` |
+
+All prompts are stored on IPFS via the Autonolas gateway. Full proof in [`olas_mech_proof.json`](olas_mech_proof.json).
+
+**How VaultGuard uses mech-client:**
+
+1. VaultGuard's private reasoner identifies a DeFi analysis task
+2. `OlasMechClient.hire_agent()` sends the prompt to an Olas mech on Base
+3. The mech processes the request using its AI tool (`short_maker`)
+4. The response is fed back into VaultGuard's privacy pipeline (hashed, never stored raw)
+5. Only public-safe outputs are produced — the mech's raw response is discarded after hashing
+
+```bash
+# View mech request proof
+python3 src/olas_mech_client.py
+
+# Use programmatically
+python3 -c "
+from src.olas_mech_client import OlasMechClient, get_proof_summary
+proof = get_proof_summary()
+print(f'Total requests: {proof[\"total_requests\"]}')
+print(f'Request IDs: {[r[\"request_id\"][:16] for r in proof[\"requests\"]]}')
+"
+```
+
 ### Commerce Privacy & Slice Hooks (Future of Commerce / Slice)
 
 Private reasoning applied to commerce: confidential pricing analysis, deal negotiation, and margin computation without exposing cost structures.
@@ -395,6 +447,7 @@ vaultguard-agent/
 │   ├── olas_service_descriptor.json  # Olas service descriptor (capabilities, pricing)
 │   ├── commerce_privacy.py           # Commerce privacy engine (Slice/Future of Commerce)
 │   ├── cli_agent.py                  # CLI agent with MoonPayMCPBridge (MoonPay CLI MCP)
+│   ├── olas_mech_client.py           # Olas Mech Marketplace client (hire AI mechs for DeFi analysis)
 │   └── ows_wallet.cjs               # OpenWallet Standard integration (7-chain wallet, signing)
 ├── test/
 │   ├── PrivacyVault.test.cjs         # 13 tests
@@ -409,6 +462,7 @@ vaultguard-agent/
 ├── moonpay_cli_proof.json            # Proof of MoonPay CLI v1.12.4 install + 92 tools verified
 ├── ows_proof.json                    # Proof of OWS wallet ops (7 chains, 5 signatures, key continuity)
 ├── slice_hook_deploy_proof.json      # Proof of Slice Hook deployment on Base Sepolia
+├── olas_mech_proof.json              # Proof of 14 Olas mech requests (Hire an Agent track)
 ├── hardhat.config.cjs
 ├── README.md
 └── requirements.txt
