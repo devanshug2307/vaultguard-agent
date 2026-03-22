@@ -138,11 +138,13 @@ Every session generates verifiable proof:
 | Contract | Network | Address |
 |----------|---------|---------|
 | PrivacyVault | Base Sepolia | [`0x3AeDD41999383E9a351B0Cb984D5Bb8eac3AAB28`](https://sepolia.basescan.org/address/0x3AeDD41999383E9a351B0Cb984D5Bb8eac3AAB28) |
+| VaultGuardSliceHook | Base Sepolia | [`0x8BC511BC3A63DB615Ab2d906Ba9C2A6EF79687b9`](https://sepolia.basescan.org/address/0x8BC511BC3A63DB615Ab2d906Ba9C2A6EF79687b9) |
+| PrivacyVault (Slice Hook) | Base Sepolia | [`0x090FdF20D68fEA1923f9Af132086837c876a0102`](https://sepolia.basescan.org/address/0x090FdF20D68fEA1923f9Af132086837c876a0102) |
 | VaultGuard Token | Status Network Sepolia | [`0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3`](https://sepoliascan.status.network/address/0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3) |
 
 ## Onchain Proof
 
-Every private reasoning session is committed onchain with hashes (never raw data). **3 onchain reasoning sessions** demonstrate the full privacy-preserving lifecycle:
+Every private reasoning session is committed onchain with hashes (never raw data). **3 onchain reasoning sessions** plus **Slice Hook commerce proof** demonstrate the full privacy-preserving lifecycle:
 
 | # | Action | TX Hash |
 |---|--------|---------|
@@ -150,10 +152,12 @@ Every private reasoning session is committed onchain with hashes (never raw data
 | 2 | Treasury Strategy (private reasoning session 1) | [`0x7c4ece...`](https://sepolia.basescan.org/tx/0x7c4ece9c262798a03bace90a41a237ba7827d912515210e14d6db596aabc0896) |
 | 3 | Governance Deliberation (private reasoning session 2) | [`0x91b5d2...`](https://sepolia.basescan.org/tx/0x91b5d2b5bb6e0164b1c0c8fcba8f2c28bc39041d6511269447e990cf4ffa5c76) |
 | 4 | Deal Evaluation (private reasoning session 3) | [`0x8455a8...`](https://sepolia.basescan.org/tx/0x8455a8616f543d0ef0dd77ee751d24ae2fd32f44b53616ecdb006fa9f546f242) |
+| 5 | Deploy VaultGuardSliceHook | [`0x0fa323...`](https://sepolia.basescan.org/tx/0x0fa32309ed333c3bd192b2a331fc03f39a5c3b3f2517675e46cdbba4f1f42cc6) |
+| 6 | Slice Commerce Proof (purchase demo) | [`0xd9c3d2...`](https://sepolia.basescan.org/tx/0xd9c3d29a44a54dc3e74e91c7eefe131027d0100df288f3ee9b4434757ace3a84) |
 
 ## Tests
 
-**13/13 passing** — run with:
+**33/33 passing** (13 PrivacyVault + 20 VaultGuardSliceHook) — run with:
 ```bash
 npx hardhat --config hardhat.config.cjs test
 ```
@@ -173,13 +177,23 @@ python3 src/olas_service.py
 - Standard request/response handler for marketplace integration
 - Health check endpoint for Olas Pearl compatibility
 
-### Commerce Privacy (Future of Commerce / Slice)
+### Commerce Privacy & Slice Hooks (Future of Commerce / Slice)
 
 Private reasoning applied to commerce: confidential pricing analysis, deal negotiation, and margin computation without exposing cost structures.
+
+**VaultGuardSliceHook** is a Slice commerce hook deployed on Base Sepolia that integrates privacy-preserving reasoning proofs with Slice product purchases:
+
+- **Dynamic Pricing (ISliceProductPrice):** Verified agents (with 2+ committed reasoning sessions in PrivacyVault) get a 20% discount. Unverified buyers pay the base price (0.001 ETH/unit).
+- **Commerce Proofs (ISliceProductAction):** Every purchase automatically commits a commerce proof to PrivacyVault, linking Slice product purchases to verifiable onchain reasoning sessions.
+- **Purchase Gating:** Open by default; subclass to add allowlist/NFT-gated behavior.
+- **20 tests passing** covering deployment, dynamic pricing, purchase gating, post-purchase proof commits, admin configuration, and view helpers.
 
 ```bash
 # Run the commerce privacy demo
 python3 src/commerce_privacy.py
+
+# Deploy Slice Hook to Base Sepolia
+npx hardhat --config hardhat.config.cjs run scripts/deploy-slice-hook.cjs --network baseSepolia
 ```
 
 - Analyze supplier quotes privately, output only the final pricing recommendation
@@ -320,9 +334,13 @@ python3 src/cli_agent.py describe    # CLI agent capabilities
 ```
 vaultguard-agent/
 ├── contracts/
-│   └── PrivacyVault.sol              # Onchain computation proof vault
+│   ├── PrivacyVault.sol              # Onchain computation proof vault
+│   ├── ISliceProductPrice.sol        # Slice pricing hook interface
+│   ├── ISliceProductAction.sol       # Slice action hook interface
+│   └── VaultGuardSliceHook.sol       # Slice commerce hook (dynamic pricing + commerce proofs)
 ├── scripts/
-│   └── deploy.cjs                    # Deploy + commit 3 sessions onchain
+│   ├── deploy.cjs                    # Deploy + commit 3 sessions onchain
+│   └── deploy-slice-hook.cjs         # Deploy Slice Hook to Base Sepolia
 ├── src/
 │   ├── private_reasoner.py           # Core privacy-preserving reasoning engine (+ ENS integration)
 │   ├── ens_resolver.py               # Real ENS name resolution (mainnet RPC, no web3.py)
@@ -331,7 +349,8 @@ vaultguard-agent/
 │   ├── commerce_privacy.py           # Commerce privacy engine (Slice/Future of Commerce)
 │   └── cli_agent.py                  # CLI agent with MoonPayMCPBridge (MoonPay CLI MCP)
 ├── test/
-│   └── PrivacyVault.test.cjs         # 13 tests
+│   ├── PrivacyVault.test.cjs         # 13 tests
+│   └── VaultGuardSliceHook.test.cjs  # 20 tests (pricing, gating, proofs, admin)
 ├── docs/
 │   ├── index.html                    # Live dashboard
 │   └── MOONPAY_CLI_SETUP.md          # MoonPay CLI setup guide
@@ -340,6 +359,7 @@ vaultguard-agent/
 ├── privacy_proof.json                # Proof of private computation
 ├── ens_proof.json                    # Proof of real ENS resolution (mainnet RPC)
 ├── moonpay_cli_proof.json            # Proof of MoonPay CLI v1.12.4 install + 92 tools verified
+├── slice_hook_deploy_proof.json      # Proof of Slice Hook deployment on Base Sepolia
 ├── hardhat.config.cjs
 ├── README.md
 └── requirements.txt

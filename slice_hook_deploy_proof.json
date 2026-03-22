@@ -1,0 +1,37 @@
+{
+  "deployment": "VaultGuardSliceHook",
+  "network": "Base Sepolia (chainId 84532)",
+  "deployer": "0x54eeFbb7b3F701eEFb7fa99473A60A6bf5fE16D7",
+  "timestamp": "2026-03-22",
+  "contracts": {
+    "PrivacyVault": {
+      "address": "0x090FdF20D68fEA1923f9Af132086837c876a0102",
+      "tx": "0xcb78d7f5fadaaac042fe7810c6966815234474613940ca4b98ad79252abc123f",
+      "explorer": "https://sepolia.basescan.org/address/0x090FdF20D68fEA1923f9Af132086837c876a0102"
+    },
+    "VaultGuardSliceHook": {
+      "address": "0x8BC511BC3A63DB615Ab2d906Ba9C2A6EF79687b9",
+      "tx": "0x0fa32309ed333c3bd192b2a331fc03f39a5c3b3f2517675e46cdbba4f1f42cc6",
+      "explorer": "https://sepolia.basescan.org/address/0x8BC511BC3A63DB615Ab2d906Ba9C2A6EF79687b9"
+    }
+  },
+  "demo_purchase": {
+    "tx": "0xd9c3d29a44a54dc3e74e91c7eefe131027d0100df288f3ee9b4434757ace3a84",
+    "slicerId": 1,
+    "productId": 1,
+    "quantity": 2,
+    "block": 39198551,
+    "explorer": "https://sepolia.basescan.org/tx/0xd9c3d29a44a54dc3e74e91c7eefe131027d0100df288f3ee9b4434757ace3a84"
+  },
+  "configuration": {
+    "basePrice": "0.001 ETH",
+    "verifiedDiscount": "20%",
+    "minSessionsForDiscount": 2
+  },
+  "tests": {
+    "total": 33,
+    "passing": 33,
+    "sliceHookTests": 20,
+    "privacyVaultTests": 13
+  }
+}
