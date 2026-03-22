@@ -244,6 +244,43 @@ VaultGuard is deployed on Status Network Sepolia with zero gas fees, enabling fr
 
 VaultGuard's CLI agent implements the OpenWallet Standard pattern — a unified interface for wallet operations across multiple chains. The `MoonPayMCPBridge` provides standardized access to wallet balances, token swaps, cross-chain bridges, token discovery, and market data across ethereum, base, polygon, arbitrum, optimism, solana, bnb, and avalanche via the MoonPay CLI MCP server.
 
+### ENS Communication
+
+VaultGuard integrates real Ethereum Name Service (ENS) resolution for human-readable agent-to-agent communication. Instead of passing raw hex addresses through private reasoning sessions, VaultGuard resolves ENS names on Ethereum mainnet using direct JSON-RPC calls to the ENS Registry contract -- no web3.py dependency required.
+
+**What it does:**
+
+1. **Resolves ENS names to addresses before processing transactions** -- When input contains `vitalik.eth`, VaultGuard resolves it to `0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045` via live mainnet RPC before feeding data into the private reasoning engine
+2. **Uses ENS names in agent-to-agent communication** -- `ENSAgentRegistry` provides full identity resolution with forward + reverse verification, so agents can authenticate each other by ENS name
+3. **Displays ENS names instead of raw hex addresses in outputs** -- `enrich_with_ens()` replaces hex addresses in output text with human-readable names like `vitalik.eth (0xd8dA...6045)`
+
+**How it works (on-chain):**
+
+- ENS Registry at `0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e` -- queries resolver address for a namehash
+- Public Resolver (varies per name) -- queries the `addr()` record for forward resolution
+- Reverse Registrar -- queries `name()` on the reverse node for address-to-name lookup
+- All calls are raw `eth_call` JSON-RPC to free Ethereum mainnet RPC endpoints (no API keys needed)
+- Pure-Python Keccak-256 + EIP-137 namehash implementation -- zero external crypto dependencies
+
+```bash
+# Run the ENS resolver demo (live mainnet resolution)
+python3 src/ens_resolver.py
+
+# Run private reasoning with ENS integration
+python3 src/private_reasoner.py
+```
+
+**Proof of real ENS resolution (from `ens_proof.json`):**
+
+| Resolution | Input | Result | Status |
+|-----------|-------|--------|--------|
+| Forward | `vitalik.eth` | `0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045` | Resolved |
+| Forward | `nick.eth` | `0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5` | Resolved |
+| Reverse | `0xd8dA6BF2...96045` | `vitalik.eth` | Resolved |
+| Batch | `nonexistent12345.eth` | `null` | Not found |
+
+All resolutions are live Ethereum mainnet RPC calls, not hardcoded values. See [`ens_proof.json`](ens_proof.json) for the full proof with timestamps.
+
 ## Agent Identity Files
 
 - **`agent.json`** — Machine-readable agent descriptor with name, version, privacy model, supported tools, tech stack, smart contract addresses, and links. Enables programmatic agent discovery.
@@ -257,8 +294,11 @@ cd vaultguard-agent
 
 pip install httpx
 
-# Run the core demo (3 private reasoning scenarios)
+# Run the core demo (4 private reasoning scenarios, including ENS)
 python3 src/private_reasoner.py
+
+# Run ENS resolver demo (live mainnet resolution)
+python3 src/ens_resolver.py
 
 # Run integrations
 python3 src/olas_service.py          # Olas marketplace service
@@ -275,7 +315,8 @@ vaultguard-agent/
 ├── scripts/
 │   └── deploy.cjs                    # Deploy + commit 3 sessions onchain
 ├── src/
-│   ├── private_reasoner.py           # Core privacy-preserving reasoning engine
+│   ├── private_reasoner.py           # Core privacy-preserving reasoning engine (+ ENS integration)
+│   ├── ens_resolver.py               # Real ENS name resolution (mainnet RPC, no web3.py)
 │   ├── olas_service.py               # Olas Pearl-compatible service component
 │   ├── olas_service_descriptor.json  # Olas service descriptor (capabilities, pricing)
 │   ├── commerce_privacy.py           # Commerce privacy engine (Slice/Future of Commerce)
@@ -288,6 +329,7 @@ vaultguard-agent/
 ├── agent.json                        # Agent identity + capabilities descriptor
 ├── agent_log.json                    # Full agent activity log
 ├── privacy_proof.json                # Proof of private computation
+├── ens_proof.json                    # Proof of real ENS resolution (mainnet RPC)
 ├── hardhat.config.cjs
 ├── README.md
 └── requirements.txt

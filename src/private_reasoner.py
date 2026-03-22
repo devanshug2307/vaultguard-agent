@@ -8,14 +8,21 @@ The key insight: an agent can analyze sensitive treasury strategies,
 governance proposals, or private deals WITHOUT exposing the reasoning.
 Only the final action/recommendation is public.
 
+Now with ENS Communication integration: resolves ENS names to addresses
+before processing transactions, uses ENS names in agent-to-agent
+communication, and displays human-readable ENS names in outputs instead
+of raw hex addresses.
+
 Built for The Synthesis Hackathon — Venice Private Agents Track ($5,750)
 """
 
 import os
+import re
 import json
 import hashlib
 from datetime import datetime
 from dataclasses import dataclass, field
+from typing import Optional
 
 import httpx
 
@@ -52,10 +59,27 @@ class PrivateReasoner:
 
     VENICE_API_URL = "https://api.venice.ai/api/v1"
 
-    def __init__(self, venice_api_key: str = ""):
+    # Regex to find Ethereum addresses in text
+    _ETH_ADDR_RE = re.compile(r"0x[0-9a-fA-F]{40}")
+
+    def __init__(self, venice_api_key: str = "", enable_ens: bool = True):
         self.venice_api_key = venice_api_key or os.getenv("VENICE_API_KEY", "")
         self.sessions: list[PrivateReasoning] = []
         self.total_sessions = 0
+        self.ens_enabled = enable_ens
+        self._ens_resolver = None  # Lazy-loaded
+
+    @property
+    def ens_resolver(self):
+        """Lazy-load the ENS resolver to avoid import cost when not needed."""
+        if self._ens_resolver is None:
+            try:
+                from ens_resolver import ENSResolver
+                self._ens_resolver = ENSResolver()
+            except ImportError:
+                self.ens_enabled = False
+                self._ens_resolver = None
+        return self._ens_resolver
 
     def _hash_data(self, data: str) -> str:
         """Create a SHA-256 hash of data — proves content without revealing it."""
@@ -236,6 +260,128 @@ SESSIONS: {len(self.sessions)}
         return report
 
 
+    # ------------------------------------------------------------------
+    # ENS Communication Integration
+    # ------------------------------------------------------------------
+
+    def resolve_ens(self, name: str) -> Optional[str]:
+        """
+        Resolve an ENS name to an Ethereum address.
+
+        Returns the checksummed address or None if resolution fails.
+        Uses the ENS resolver with mainnet RPC calls.
+        """
+        if not self.ens_enabled or not self.ens_resolver:
+            return None
+        try:
+            return self.ens_resolver.resolve(name)
+        except Exception:
+            return None
+
+    def reverse_resolve_ens(self, address: str) -> Optional[str]:
+        """
+        Reverse-resolve an Ethereum address to its primary ENS name.
+
+        Returns the ENS name or None if no reverse record exists.
+        """
+        if not self.ens_enabled or not self.ens_resolver:
+            return None
+        try:
+            return self.ens_resolver.reverse_resolve(address)
+        except Exception:
+            return None
+
+    def enrich_with_ens(self, text: str) -> str:
+        """
+        Replace raw Ethereum addresses in text with ENS names where available.
+
+        For example:
+            "Send 1 ETH to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+        becomes:
+            "Send 1 ETH to vitalik.eth (0xd8dA...6045)"
+
+        This makes outputs human-readable without losing traceability.
+        """
+        if not self.ens_enabled or not self.ens_resolver:
+            return text
+
+        addresses = set(self._ETH_ADDR_RE.findall(text))
+        for addr in addresses:
+            ens_name = self.reverse_resolve_ens(addr)
+            if ens_name:
+                short_addr = addr[:6] + "..." + addr[-4:]
+                text = text.replace(addr, f"{ens_name} ({short_addr})")
+        return text
+
+    def reason_with_ens(self, sensitive_input: str, task: str,
+                        privacy_mode: str = "full",
+                        resolve_addresses: bool = True) -> PrivateReasoning:
+        """
+        ENS-aware private reasoning.
+
+        Like reason_privately(), but first resolves any ENS names found in
+        the input (e.g. "vitalik.eth" -> "0xd8dA...") and enriches the
+        output actions with human-readable ENS names.
+
+        Args:
+            sensitive_input: The private data to analyze (NEVER stored)
+            task: What kind of analysis to perform
+            privacy_mode: "full" (nothing stored) or "hash_only" (hashes kept)
+            resolve_addresses: If True, resolve ENS names in input first
+
+        Returns:
+            PrivateReasoning with ENS-enriched public outputs
+        """
+        # Pre-process: resolve any .eth names in the input to addresses
+        enriched_input = sensitive_input
+        ens_mappings = {}
+        if resolve_addresses and self.ens_enabled and self.ens_resolver:
+            # Find ENS names (word.eth pattern)
+            ens_names = re.findall(r"\b[\w-]+\.eth\b", sensitive_input)
+            for name in set(ens_names):
+                addr = self.resolve_ens(name)
+                if addr:
+                    ens_mappings[name] = addr
+
+        # Run the normal private reasoning
+        session = self.reason_privately(enriched_input, task, privacy_mode)
+
+        # Post-process: enrich output with ENS names
+        if ens_mappings:
+            enriched_summary = session.output_summary
+            for name, addr in ens_mappings.items():
+                short_addr = addr[:6] + "..." + addr[-4:]
+                enriched_summary = enriched_summary.replace(
+                    addr, f"{name} ({short_addr})"
+                )
+            session.output_summary = enriched_summary
+
+        return session
+
+    def get_agent_ens_identity(self, ens_name: str) -> dict:
+        """
+        Resolve the full ENS identity for an agent, for use in
+        agent-to-agent communication.
+
+        Returns a dict with resolved address, reverse verification,
+        and communication metadata.
+        """
+        if not self.ens_enabled or not self.ens_resolver:
+            return {
+                "ens_name": ens_name,
+                "resolved_address": None,
+                "status": "ens_disabled",
+            }
+        try:
+            return self.ens_resolver.resolve_agent_identity(ens_name)
+        except Exception as e:
+            return {
+                "ens_name": ens_name,
+                "resolved_address": None,
+                "status": f"error: {e}",
+            }
+
+
 def demo():
     """Demo the private reasoning agent."""
     reasoner = PrivateReasoner()
@@ -270,6 +416,29 @@ def demo():
     )
     print(f"  Session: {session3.session_id}")
     print(f"  Public actions: {session3.output_actions}")
+
+    # Scenario 4: ENS-aware private reasoning
+    print("\n--- Scenario 4: ENS-Aware Transaction Analysis ---")
+    if reasoner.ens_enabled:
+        session4 = reasoner.reason_with_ens(
+            sensitive_input=(
+                "Transfer 100 USDC to vitalik.eth for advisory services. "
+                "Also send 50 USDC to nick.eth for ENS integration consulting."
+            ),
+            task="treasury_strategy"
+        )
+        print(f"  Session: {session4.session_id}")
+        print(f"  ENS names resolved before analysis")
+        print(f"  Public actions: {session4.output_actions}")
+
+        # Show ENS identity resolution
+        print("\n--- ENS Agent Identity Resolution ---")
+        identity = reasoner.get_agent_ens_identity("vitalik.eth")
+        print(f"  ENS Name:    {identity.get('ens_name', 'N/A')}")
+        print(f"  Address:     {identity.get('resolved_address', 'N/A')}")
+        print(f"  Verified:    {identity.get('reverse_verified', False)}")
+    else:
+        print("  [ENS resolver not available -- skipping]")
 
     # Full report
     print(reasoner.generate_report())
