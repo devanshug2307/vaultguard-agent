@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-03-22T08:41:18.714Z",
+  "actionFile": "vaultguard-private-reasoning.js",
+  "contentHash": "QmeZQgyVw74RQXaULgZ4XN4M7eWSmsTq6jMtzq1BZ8uoLJ",
+  "ipfsCid": "QmeZQgyVw74RQXaULgZ4XN4M7eWSmsTq6jMtzq1BZ8uoLJ",
+  "ipfsGatewayUrl": "https://ipfs.io/ipfs/QmeZQgyVw74RQXaULgZ4XN4M7eWSmsTq6jMtzq1BZ8uoLJ",
+  "sizeBytes": 2535,
+  "litNetwork": "datil-dev",
+  "litSdkVersion": "@lit-protocol/lit-node-client@7.4.0",
+  "teeRuntime": "Chipotle",
+  "status": "cid_computed",
+  "cidMethod": "ipfs-only-hash (deterministic UnixFS DAG-PB)",
+  "pinInstructions": {
+    "pinata": "Upload file at https://app.pinata.cloud/ and note the CID",
+    "web3storage": "npx w3 up lit-actions/vaultguard-private-reasoning.js",
+    "localIpfs": "ipfs add lit-actions/vaultguard-private-reasoning.js"
+  },
+  "executeWith": {
+    "method": "litClient.executeJs",
+    "params": {
+      "code": "(inline - see vaultguard-private-reasoning.js)",
+      "ipfsId": "QmeZQgyVw74RQXaULgZ4XN4M7eWSmsTq6jMtzq1BZ8uoLJ",
+      "jsParams": {
+        "vaultData": {
+          "balance": "1000",
+          "yieldRate": "4.5",
+          "riskScore": "0.3"
+        },
+        "threshold": 0.05,
+        "actionType": "health_check"
+      }
+    }
+  }
+}

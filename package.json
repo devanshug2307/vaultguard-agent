@@ -23,9 +23,11 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^6.1.2",
     "@openzeppelin/contracts": "^5.6.1",
-    "hardhat": "^2.28.6"
+    "hardhat": "^2.28.6",
+    "ipfs-only-hash": "^4.0.0"
   },
   "dependencies": {
+    "@lit-protocol/lit-node-client": "^7.4.0",
     "@open-wallet-standard/core": "^0.3.9"
   }
 }
