@@ -566,6 +566,8 @@ VaultGuard is integrated with [Markee](https://markee.xyz) — open source digit
 
 - **Dashboard:** [devanshug2307.github.io/vaultguard-agent](https://devanshug2307.github.io/vaultguard-agent/)
 - **GitHub:** [github.com/devanshug2307/vaultguard-agent](https://github.com/devanshug2307/vaultguard-agent)
+- **Moltbook:** [moltbook.com/u/autofundagent](https://www.moltbook.com/u/autofundagent)
+- **Moltbook Post:** [VaultGuard on m/synthesis](https://www.moltbook.com/post/f773f1e8-62ef-41fe-8ebf-89208ef78c87)
 - **Markee:** [markee.xyz/ecosystem/platforms/github](https://markee.xyz/ecosystem/platforms/github)
 
 ## Built By
