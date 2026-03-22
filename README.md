@@ -105,7 +105,8 @@ print(proof["verified"])        # True
 
 VaultGuard is designed for Venice's zero-storage inference:
 - **Endpoint:** `https://api.venice.ai/api/v1/chat/completions`
-- **Privacy:** Venice stores nothing — no logs, no training data, no traces
+- **API Key:** Configured (set `VENICE_API_KEY` in `.env`)
+- **Privacy:** Venice stores nothing — no logs, no training data, no traces (zero-storage inference)
 - **Models:** Llama 3.3 70B and others via Venice
 - **Fallback:** Local reasoning when Venice is unavailable
 
@@ -132,22 +133,23 @@ Every session generates verifiable proof:
 - Specific actions were generated
 - All without revealing the private data
 
-## Deployed Contract (Base Sepolia)
+## Deployed Contracts
 
 | Contract | Network | Address |
 |----------|---------|---------|
 | PrivacyVault | Base Sepolia | [`0x3AeDD41999383E9a351B0Cb984D5Bb8eac3AAB28`](https://sepolia.basescan.org/address/0x3AeDD41999383E9a351B0Cb984D5Bb8eac3AAB28) |
+| VaultGuard Token | Status Network Sepolia | [`0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3`](https://sepoliascan.status.network/address/0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3) |
 
 ## Onchain Proof
 
-Every private reasoning session is committed onchain with hashes (never raw data):
+Every private reasoning session is committed onchain with hashes (never raw data). **3 onchain reasoning sessions** demonstrate the full privacy-preserving lifecycle:
 
 | # | Action | TX Hash |
 |---|--------|---------|
 | 1 | Deploy PrivacyVault | [`0xee4682...`](https://sepolia.basescan.org/tx/0xee46829d529cb951926004d27db53976bee4185e211aca218f8e3cf53eb77d23) |
-| 2 | Treasury Strategy (private reasoning) | [`0x7c4ece...`](https://sepolia.basescan.org/tx/0x7c4ece9c262798a03bace90a41a237ba7827d912515210e14d6db596aabc0896) |
-| 3 | Governance Deliberation (private reasoning) | [`0x91b5d2...`](https://sepolia.basescan.org/tx/0x91b5d2b5bb6e0164b1c0c8fcba8f2c28bc39041d6511269447e990cf4ffa5c76) |
-| 4 | Deal Evaluation (private reasoning) | [`0x8455a8...`](https://sepolia.basescan.org/tx/0x8455a8616f543d0ef0dd77ee751d24ae2fd32f44b53616ecdb006fa9f546f242) |
+| 2 | Treasury Strategy (private reasoning session 1) | [`0x7c4ece...`](https://sepolia.basescan.org/tx/0x7c4ece9c262798a03bace90a41a237ba7827d912515210e14d6db596aabc0896) |
+| 3 | Governance Deliberation (private reasoning session 2) | [`0x91b5d2...`](https://sepolia.basescan.org/tx/0x91b5d2b5bb6e0164b1c0c8fcba8f2c28bc39041d6511269447e990cf4ffa5c76) |
+| 4 | Deal Evaluation (private reasoning session 3) | [`0x8455a8...`](https://sepolia.basescan.org/tx/0x8455a8616f543d0ef0dd77ee751d24ae2fd32f44b53616ecdb006fa9f546f242) |
 
 ## Tests
 
@@ -184,9 +186,25 @@ python3 src/commerce_privacy.py
 - Evaluate deal terms without revealing negotiation strategy
 - Compute margins without exposing cost structure to counterparties
 
-### CLI Agent (MoonPay CLI)
+### CLI Agent (MoonPay CLI MCP Integration)
 
-Full command-line interface for running VaultGuard from the terminal — crypto-native portfolio analysis with private reasoning.
+Full command-line interface for running VaultGuard from the terminal — crypto-native portfolio analysis with private reasoning. The CLI uses `MoonPayMCPBridge` to communicate with the MoonPay CLI (`mp mcp`) over stdio JSON-RPC 2.0, combining live on-chain data with private reasoning.
+
+**Privacy model:** VaultGuard never sends raw sensitive data to MoonPay. MoonPay is used only for public on-chain actions (balances, swaps). Private reasoning stays in the `PrivateReasoner` (hashed, in-memory only).
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `analyze` | Run a private reasoning session (treasury, governance, or deal) |
+| `portfolio` | Quick private portfolio analysis from holdings |
+| `verify` | Verify a session's cryptographic proof |
+| `report` | Print full report of all reasoning sessions |
+| `describe` | Show agent capabilities and supported chains |
+| `moonpay-status` | Check MoonPay CLI installation and MCP connection |
+| `balances` | Fetch live wallet balances via MoonPay CLI |
+| `swap` | Execute token swap via MoonPay CLI |
+| `portfolio-live` | Fetch live balances via MoonPay, then analyze privately |
 
 ```bash
 # Quick portfolio analysis
@@ -203,7 +221,33 @@ python3 src/cli_agent.py analyze --task deal_evaluation --data "Terms..." -o pro
 
 # Show capabilities
 python3 src/cli_agent.py describe
+
+# Check MoonPay CLI status and MCP connection
+python3 src/cli_agent.py moonpay-status
+
+# Fetch live balances via MoonPay CLI
+python3 src/cli_agent.py balances --wallet 0x... --chain ethereum
+
+# Live portfolio analysis (MoonPay + private reasoning)
+python3 src/cli_agent.py portfolio-live --wallet 0x... --chains ethereum,base,polygon
 ```
+
+### Status Network — Gasless L2 Deployment
+
+VaultGuard is deployed on Status Network Sepolia with zero gas fees, enabling free private reasoning session commits.
+
+- **Contract:** [`0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3`](https://sepoliascan.status.network/address/0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3)
+- **Zero gas fees** make it ideal for high-frequency privacy proof commits
+- **Explorer:** [sepoliascan.status.network](https://sepoliascan.status.network)
+
+### OpenWallet Standard
+
+VaultGuard's CLI agent implements the OpenWallet Standard pattern — a unified interface for wallet operations across multiple chains. The `MoonPayMCPBridge` provides standardized access to wallet balances, token swaps, cross-chain bridges, token discovery, and market data across ethereum, base, polygon, arbitrum, optimism, solana, bnb, and avalanche via the MoonPay CLI MCP server.
+
+## Agent Identity Files
+
+- **`agent.json`** — Machine-readable agent descriptor with name, version, privacy model, supported tools, tech stack, smart contract addresses, and links. Enables programmatic agent discovery.
+- **`agent_log.json`** — Complete activity log recording all private reasoning sessions, onchain commits, and verification results.
 
 ## How to Run
 
@@ -227,19 +271,23 @@ python3 src/cli_agent.py describe    # CLI agent capabilities
 ```
 vaultguard-agent/
 ├── contracts/
-│   └── PrivacyVault.sol       # Onchain computation proof vault
+│   └── PrivacyVault.sol              # Onchain computation proof vault
 ├── scripts/
-│   └── deploy.cjs             # Deploy + commit 3 sessions onchain
+│   └── deploy.cjs                    # Deploy + commit 3 sessions onchain
 ├── src/
-│   ├── private_reasoner.py    # Core privacy-preserving reasoning engine
-│   ├── olas_service.py        # Olas Pearl-compatible service component
-│   ├── commerce_privacy.py    # Commerce privacy engine (Slice/Future of Commerce)
-│   └── cli_agent.py           # CLI agent for crypto operations (MoonPay CLI)
+│   ├── private_reasoner.py           # Core privacy-preserving reasoning engine
+│   ├── olas_service.py               # Olas Pearl-compatible service component
+│   ├── olas_service_descriptor.json  # Olas service descriptor (capabilities, pricing)
+│   ├── commerce_privacy.py           # Commerce privacy engine (Slice/Future of Commerce)
+│   └── cli_agent.py                  # CLI agent with MoonPayMCPBridge (MoonPay CLI MCP)
 ├── test/
-│   └── PrivacyVault.test.cjs  # 13 tests
+│   └── PrivacyVault.test.cjs         # 13 tests
 ├── docs/
-│   └── index.html             # Live dashboard
-├── privacy_proof.json         # Proof of private computation
+│   ├── index.html                    # Live dashboard
+│   └── MOONPAY_CLI_SETUP.md          # MoonPay CLI setup guide
+├── agent.json                        # Agent identity + capabilities descriptor
+├── agent_log.json                    # Full agent activity log
+├── privacy_proof.json                # Proof of private computation
 ├── hardhat.config.cjs
 ├── README.md
 └── requirements.txt
