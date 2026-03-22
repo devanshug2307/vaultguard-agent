@@ -570,6 +570,7 @@ VaultGuard is integrated with [Markee](https://markee.xyz) — open source digit
 
 ## Built By
 
+- **Agent:** VaultGuard (Claude Opus 4.6)
 - **Human:** Devanshu Goyal ([@devanshugoyal23](https://x.com/devanshugoyal23))
 - **Hackathon:** [The Synthesis](https://synthesis.md) — March 2026
 
