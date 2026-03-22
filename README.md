@@ -156,6 +156,55 @@ Every private reasoning session is committed onchain with hashes (never raw data
 npx hardhat --config hardhat.config.cjs test
 ```
 
+## Integrations
+
+### Olas Autonomous Service (Hire on Olas)
+
+VaultGuard is registered as an Olas-compatible autonomous service component. Other agents can discover, hire, and invoke it through the Olas marketplace.
+
+```bash
+# Run the Olas service demo
+python3 src/olas_service.py
+```
+
+- Service descriptor with capabilities, pricing (0.001 ETH/session), and privacy guarantees
+- Standard request/response handler for marketplace integration
+- Health check endpoint for Olas Pearl compatibility
+
+### Commerce Privacy (Future of Commerce / Slice)
+
+Private reasoning applied to commerce: confidential pricing analysis, deal negotiation, and margin computation without exposing cost structures.
+
+```bash
+# Run the commerce privacy demo
+python3 src/commerce_privacy.py
+```
+
+- Analyze supplier quotes privately, output only the final pricing recommendation
+- Evaluate deal terms without revealing negotiation strategy
+- Compute margins without exposing cost structure to counterparties
+
+### CLI Agent (MoonPay CLI)
+
+Full command-line interface for running VaultGuard from the terminal — crypto-native portfolio analysis with private reasoning.
+
+```bash
+# Quick portfolio analysis
+python3 src/cli_agent.py portfolio "40% ETH" "30% BTC" "30% USDC"
+
+# Private treasury analysis
+python3 src/cli_agent.py analyze --task treasury_strategy --data "Portfolio: $5M..."
+
+# Governance deliberation from file
+python3 src/cli_agent.py analyze --task governance_analysis --file proposal.txt
+
+# Export proof to JSON
+python3 src/cli_agent.py analyze --task deal_evaluation --data "Terms..." -o proof.json
+
+# Show capabilities
+python3 src/cli_agent.py describe
+```
+
 ## How to Run
 
 ```bash
@@ -164,8 +213,13 @@ cd vaultguard-agent
 
 pip install httpx
 
-# Run the demo (3 private reasoning scenarios)
+# Run the core demo (3 private reasoning scenarios)
 python3 src/private_reasoner.py
+
+# Run integrations
+python3 src/olas_service.py          # Olas marketplace service
+python3 src/commerce_privacy.py      # Commerce privacy engine
+python3 src/cli_agent.py describe    # CLI agent capabilities
 ```
 
 ## Project Structure
@@ -177,7 +231,10 @@ vaultguard-agent/
 ├── scripts/
 │   └── deploy.cjs             # Deploy + commit 3 sessions onchain
 ├── src/
-│   └── private_reasoner.py    # Core privacy-preserving reasoning engine
+│   ├── private_reasoner.py    # Core privacy-preserving reasoning engine
+│   ├── olas_service.py        # Olas Pearl-compatible service component
+│   ├── commerce_privacy.py    # Commerce privacy engine (Slice/Future of Commerce)
+│   └── cli_agent.py           # CLI agent for crypto operations (MoonPay CLI)
 ├── test/
 │   └── PrivacyVault.test.cjs  # 13 tests
 ├── docs/
