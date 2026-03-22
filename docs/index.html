@@ -10,50 +10,353 @@ body{font-family:'SF Mono',monospace;background:#0a0a0f;color:#e0e0e0;min-height
 .header{background:linear-gradient(135deg,#1a1a2e,#0f3460);border-bottom:1px solid #2a2a4a;padding:24px 32px}
 .header h1{font-size:28px;color:#e94560;margin-bottom:4px}
 .header p{color:#888;font-size:14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;padding:24px 32px;max-width:1200px;margin:0 auto}
-.card{background:#12121f;border:1px solid #2a2a4a;border-radius:12px;padding:24px}
-.card h2{font-size:14px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px}
-.stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1a1a2f}
+.header .subtitle{color:#666;font-size:12px;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;padding:24px 32px;max-width:1400px;margin:0 auto}
+.card{background:#12121f;border:1px solid #2a2a4a;border-radius:12px;padding:24px;transition:border-color 0.2s}
+.card:hover{border-color:#3a3a5a}
+.card h2{font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card h2 .icon{font-size:15px}
+.stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1a1a2f;font-size:13px}
 .stat-row:last-child{border-bottom:none}
 .stat-label{color:#888}.stat-value{color:#e0e0e0;font-weight:bold}
-.red{color:#e94560}.green{color:#00ff88}
-.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;background:#330011;color:#e94560}
+.red{color:#e94560}.green{color:#00ff88}.blue{color:#4a9eff}.yellow{color:#ffd700}.purple{color:#b388ff}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold}
+.badge-red{background:#330011;color:#e94560}
+.badge-green{background:#002211;color:#00ff88}
+.badge-blue{background:#001133;color:#4a9eff}
+.badge-yellow{background:#332200;color:#ffd700}
+.badge-purple{background:#1a0033;color:#b388ff}
 .full-width{grid-column:1/-1}
 .privacy-flow{text-align:center;padding:20px;color:#e94560;font-size:13px;line-height:2}
+.tx-hash{font-family:'SF Mono',monospace;font-size:11px;color:#4a9eff;word-break:break-all}
+.tx-hash a{color:#4a9eff;text-decoration:none}
+.tx-hash a:hover{text-decoration:underline}
+.addr{font-size:11px;color:#b388ff;word-break:break-all}
+.addr a{color:#b388ff;text-decoration:none}
+.addr a:hover{text-decoration:underline}
+.tag-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;background:#1a1a2f;color:#888;border:1px solid #2a2a4a}
+.section-divider{grid-column:1/-1;text-align:center;padding:8px 0;color:#333;font-size:11px;text-transform:uppercase;letter-spacing:3px;border-top:1px solid #1a1a2f;margin-top:4px}
+.session-item{padding:10px 0;border-bottom:1px solid #1a1a2f}
+.session-item:last-child{border-bottom:none}
+.session-id{font-size:11px;color:#666;margin-bottom:4px}
+.session-actions{font-size:12px;color:#aaa;margin-top:4px}
+.hash-preview{font-size:10px;color:#555;font-family:'SF Mono',monospace;margin-top:2px}
+.proof-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px}
+.proof-item{background:#0a0a15;border:1px solid #1a1a2f;border-radius:6px;padding:8px 10px;font-size:11px;color:#888}
+.proof-item .name{color:#e0e0e0;font-weight:bold;margin-bottom:2px}
+.chain-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chain-badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:bold;background:#0a1a2f;color:#4a9eff;border:1px solid #1a3a5f}
+.links-row{display:flex;flex-wrap:wrap;gap:12px;padding:8px 0}
+.links-row a{color:#4a9eff;text-decoration:none;font-size:13px;padding:6px 14px;border:1px solid #2a2a4a;border-radius:8px;background:#0a0a15;transition:all 0.2s}
+.links-row a:hover{border-color:#4a9eff;background:#0a1530}
+.counter{font-size:32px;font-weight:bold;color:#e94560;margin:8px 0}
+.counter-label{font-size:12px;color:#666}
+.mini-table{width:100%;font-size:12px;border-collapse:collapse;margin-top:8px}
+.mini-table td{padding:4px 0;border-bottom:1px solid #1a1a2f}
+.mini-table td:last-child{text-align:right;color:#aaa}
 </style>
 </head>
 <body>
 <div class="header">
-<h1>VaultGuard <span style="color:#444">|</span> Private AI Reasoning</h1>
+<h1>VaultGuard <span style="color:#444">|</span> Private AI Reasoning Agent</h1>
 <p>Think privately. Act publicly. Prove everything. Built for The Synthesis 2026.</p>
+<div class="subtitle">12 integrations &middot; 6 onchain transactions &middot; 33 passing tests &middot; 14 Olas Mech requests &middot; 7 chains via OWS</div>
 </div>
+
 <div class="grid">
+
+<!-- ==================== PRIVACY MODEL ==================== -->
 <div class="card">
 <h2>Privacy Model</h2>
-<div class="stat-row"><span class="stat-label">Input Data</span><span class="stat-value red">HASHED (SHA-256)</span></div>
+<div class="stat-row"><span class="stat-label">Input Data</span><span class="stat-value red">SHA-256 HASHED</span></div>
 <div class="stat-row"><span class="stat-label">Reasoning</span><span class="stat-value red">IN-MEMORY ONLY</span></div>
 <div class="stat-row"><span class="stat-label">Output</span><span class="stat-value green">PUBLIC-SAFE</span></div>
 <div class="stat-row"><span class="stat-label">Verification</span><span class="stat-value green">Hash-based proof</span></div>
 <div class="stat-row"><span class="stat-label">LLM Provider</span><span class="stat-value">Venice (zero storage)</span></div>
+<div class="stat-row"><span class="stat-label">Private Data Exposed</span><span class="stat-value red">ZERO</span></div>
 </div>
+
+<!-- ==================== REASONING SESSIONS ==================== -->
 <div class="card">
 <h2>Reasoning Sessions</h2>
-<div class="stat-row"><span class="stat-label">Treasury Strategy</span><span class="stat-value">4 actions generated</span></div>
-<div class="stat-row"><span class="stat-label">Governance Analysis</span><span class="stat-value">3 actions generated</span></div>
-<div class="stat-row"><span class="stat-label">Deal Evaluation</span><span class="stat-value">3 actions generated</span></div>
-<div class="stat-row"><span class="stat-label">Total Sessions</span><span class="stat-value">3</span></div>
-<div class="stat-row"><span class="stat-label">Data Exposed</span><span class="stat-value red">ZERO</span></div>
+<div class="session-item">
+<div class="session-id">vg-0001-070114 &middot; Treasury Strategy</div>
+<div class="session-actions">4 actions: Reduce volatile 15%, increase yield, diversify 3 sources, hold stETH</div>
+<div class="hash-preview">input: 4277e11b... reasoning: e97e8e2d...</div>
+<div style="margin-top:2px"><span class="badge badge-green">VERIFIED</span></div>
 </div>
+<div class="session-item">
+<div class="session-id">vg-0002-070114 &middot; Governance Deliberation</div>
+<div class="session-actions">3 actions: SUPPORT w/ amendments, flag security, extend timeline</div>
+<div class="hash-preview">input: b34b9724... reasoning: df038672...</div>
+<div style="margin-top:2px"><span class="badge badge-green">VERIFIED</span></div>
+</div>
+<div class="session-item">
+<div class="session-id">vg-0003-070114 &middot; Deal Evaluation</div>
+<div class="session-actions">3 actions: Accept w/ 10% haircut, milestone vesting, regulatory clause</div>
+<div class="hash-preview">input: 74f4c036... reasoning: 608961fd...</div>
+<div style="margin-top:2px"><span class="badge badge-green">VERIFIED</span></div>
+</div>
+<div class="session-item">
+<div class="session-id">vg-0004-070123 &middot; Portfolio Rebalance</div>
+<div class="session-actions">4 actions: Reduce volatile 15%, increase yield, diversify, hold stETH</div>
+<div class="hash-preview">input: 2b939e99... reasoning: e97e8e2d...</div>
+<div style="margin-top:2px"><span class="badge badge-green">VERIFIED</span></div>
+</div>
+</div>
+
+<!-- ==================== PRIVACY FLOW ==================== -->
 <div class="card full-width">
 <h2>Privacy Flow</h2>
 <div class="privacy-flow">
-Sensitive Input → <span style="color:#444">SHA-256 Hash</span> → Private Reasoning (in-memory) → <span style="color:#444">Reasoning Hash</span> → Public Actions Only → <span style="color:#00ff88">Verification Proof</span>
+Sensitive Input &#8594; <span style="color:#444">SHA-256 Hash</span> &#8594; Private Reasoning (in-memory) &#8594; <span style="color:#444">Reasoning Hash</span> &#8594; Public Actions Only &#8594; <span style="color:#00ff88">Verification Proof</span>
+</div>
+</div>
+
+<!-- ==================== SECTION: ONCHAIN ==================== -->
+<div class="section-divider">Onchain Infrastructure</div>
+
+<!-- ==================== DEPLOYED CONTRACTS ==================== -->
+<div class="card">
+<h2>Deployed Contracts</h2>
+<div class="stat-row">
+<span class="stat-label">PrivacyVault</span>
+<span class="stat-value"><span class="addr"><a href="https://sepolia.basescan.org/address/0x3AeDD41999383E9a351B0Cb984D5Bb8eac3AAB28" target="_blank">0x3AeDD4...AAB28</a></span></span>
+</div>
+<div class="stat-row">
+<span class="stat-label">VaultGuardSliceHook</span>
+<span class="stat-value"><span class="addr"><a href="https://sepolia.basescan.org/address/0x8BC511BC3A63DB615Ab2d906Ba9C2A6EF79687b9" target="_blank">0x8BC511...87b9</a></span></span>
+</div>
+<div class="stat-row">
+<span class="stat-label">PrivacyVault (Slice)</span>
+<span class="stat-value"><span class="addr"><a href="https://sepolia.basescan.org/address/0x090FdF20D68fEA1923f9Af132086837c876a0102" target="_blank">0x090FdF...0102</a></span></span>
+</div>
+<div class="stat-row">
+<span class="stat-label">VaultGuard Token (Status)</span>
+<span class="stat-value"><span class="addr"><a href="https://sepoliascan.status.network/address/0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3" target="_blank">0x51C96F...Ba3</a></span></span>
+</div>
+<div class="stat-row">
+<span class="stat-label">Network</span>
+<span class="stat-value">Base Sepolia + Status Sepolia</span>
+</div>
+</div>
+
+<!-- ==================== ONCHAIN PROOF ==================== -->
+<div class="card">
+<h2>Onchain Proof &mdash; 6 Transactions</h2>
+<table class="mini-table">
+<tr><td>1. Deploy PrivacyVault</td><td><span class="tx-hash"><a href="https://sepolia.basescan.org/tx/0xee4682" target="_blank">0xee4682...</a></span></td></tr>
+<tr><td>2. Treasury Strategy session</td><td><span class="tx-hash"><a href="https://sepolia.basescan.org/tx/0x7c4ece" target="_blank">0x7c4ece...</a></span></td></tr>
+<tr><td>3. Governance Deliberation</td><td><span class="tx-hash"><a href="https://sepolia.basescan.org/tx/0x91b5d2" target="_blank">0x91b5d2...</a></span></td></tr>
+<tr><td>4. Deal Evaluation</td><td><span class="tx-hash"><a href="https://sepolia.basescan.org/tx/0x8455a8" target="_blank">0x8455a8...</a></span></td></tr>
+<tr><td>5. Deploy SliceHook</td><td><span class="tx-hash"><a href="https://sepolia.basescan.org/tx/0x0fa32309ed333c3bd192b2a331fc03f39a5c3b3f2517675e46cdbba4f1f42cc6" target="_blank">0x0fa323...</a></span></td></tr>
+<tr><td>6. Slice Commerce purchase</td><td><span class="tx-hash"><a href="https://sepolia.basescan.org/tx/0xd9c3d29a44a54dc3e74e91c7eefe131027d0100df288f3ee9b4434757ace3a84" target="_blank">0xd9c3d2...</a></span></td></tr>
+</table>
+</div>
+
+<!-- ==================== SECTION: AGENT INTEGRATIONS ==================== -->
+<div class="section-divider">Agent Integrations</div>
+
+<!-- ==================== OLAS MECH MARKETPLACE ==================== -->
+<div class="card">
+<h2>Olas Mech Marketplace</h2>
+<div class="counter">14</div>
+<div class="counter-label">Requests Completed</div>
+<div class="stat-row"><span class="stat-label">Mech</span><span class="stat-value">#112 on Base</span></div>
+<div class="stat-row"><span class="stat-label">Tool</span><span class="stat-value">short_maker</span></div>
+<div class="stat-row"><span class="stat-label">Offchain</span><span class="stat-value green">Yes</span></div>
+<div class="stat-row"><span class="stat-label">Mech URL</span><span class="stat-value" style="font-size:10px"><a href="https://9ea5c24c68527852.agent.propel.autonolas.tech" target="_blank" style="color:#4a9eff;text-decoration:none">autonolas.tech</a></span></div>
+<div class="tag-list">
+<span class="tag">DeFi Risk</span>
+<span class="tag">ETH Staking</span>
+<span class="tag">Stablecoins</span>
+<span class="tag">Portfolio Opt.</span>
+<span class="tag">Lido vs Aave</span>
+<span class="tag">Treasury Mgmt</span>
+<span class="tag">Agent Economy</span>
+<span class="tag">Price Analysis</span>
+<span class="tag">Smart Contract Security</span>
+<span class="tag">Governance</span>
+<span class="tag">L2 Fees</span>
+<span class="tag">Bridges</span>
+<span class="tag">EIP-4844</span>
+<span class="tag">Liquid Restaking</span>
+</div>
+</div>
+
+<!-- ==================== LIT PROTOCOL ==================== -->
+<div class="card">
+<h2>Lit Protocol (Chipotle TEE)</h2>
+<div class="stat-row"><span class="stat-label">Network</span><span class="stat-value">datil-dev</span></div>
+<div class="stat-row"><span class="stat-label">SDK</span><span class="stat-value">@lit-protocol/lit-node-client v7.4.0</span></div>
+<div class="stat-row"><span class="stat-label">IPFS CID</span><span class="stat-value" style="font-size:10px"><a href="https://ipfs.io/ipfs/QmeZQgyVw74RQXaULgZ4XN4M7eWSmsTq6jMtzq1BZ8uoLJ" target="_blank" style="color:#4a9eff;text-decoration:none">QmeZQgy...oLJ</a></span></div>
+<div class="stat-row"><span class="stat-label">TEE Runtime</span><span class="stat-value purple">Chipotle</span></div>
+<div style="margin-top:12px;font-size:12px;color:#888">Action Types:</div>
+<table class="mini-table">
+<tr><td><span class="green">health_check</span></td><td>Vault health assessment</td></tr>
+<tr><td><span class="green">rebalance</span></td><td>Portfolio rebalancing decision</td></tr>
+<tr><td><span class="green">risk_check</span></td><td>Risk exposure assessment</td></tr>
+</table>
+<div class="stat-row" style="margin-top:8px"><span class="stat-label">Private Data Exposed</span><span class="stat-value red">NONE</span></div>
+</div>
+
+<!-- ==================== SLICE HOOKS ==================== -->
+<div class="card">
+<h2>Slice Hooks</h2>
+<div class="stat-row"><span class="stat-label">Contract</span><span class="stat-value"><span class="addr"><a href="https://sepolia.basescan.org/address/0x8BC511BC3A63DB615Ab2d906Ba9C2A6EF79687b9" target="_blank">VaultGuardSliceHook</a></span></span></div>
+<div class="stat-row"><span class="stat-label">Network</span><span class="stat-value">Base Sepolia</span></div>
+<div class="stat-row"><span class="stat-label">Base Price</span><span class="stat-value">0.001 ETH</span></div>
+<div class="stat-row"><span class="stat-label">Verified Discount</span><span class="stat-value green">20%</span></div>
+<div class="stat-row"><span class="stat-label">Min Sessions</span><span class="stat-value">2 for discount</span></div>
+<div class="stat-row"><span class="stat-label">Demo Purchase</span><span class="stat-value"><span class="tx-hash"><a href="https://sepolia.basescan.org/tx/0xd9c3d29a44a54dc3e74e91c7eefe131027d0100df288f3ee9b4434757ace3a84" target="_blank">0xd9c3d2...</a></span></span></div>
+<div class="stat-row"><span class="stat-label">Commerce Proofs</span><span class="stat-value green">Committed onchain</span></div>
+<div class="stat-row"><span class="stat-label">Tests</span><span class="stat-value green">20 passing</span></div>
+</div>
+
+<!-- ==================== MOONPAY CLI ==================== -->
+<div class="card">
+<h2>MoonPay CLI</h2>
+<div class="stat-row"><span class="stat-label">Version</span><span class="stat-value">v1.12.4</span></div>
+<div class="stat-row"><span class="stat-label">MCP Tools</span><span class="stat-value">92</span></div>
+<div class="stat-row"><span class="stat-label">Bridge Class</span><span class="stat-value">MoonPayMCPBridge</span></div>
+<div class="stat-row"><span class="stat-label">Protocol</span><span class="stat-value">JSON-RPC 2.0 / stdio</span></div>
+<div style="margin-top:12px;font-size:12px;color:#888">CLI Commands:</div>
+<table class="mini-table">
+<tr><td><code style="color:#4a9eff">moonpay-status</code></td><td>Installation + MCP check</td></tr>
+<tr><td><code style="color:#4a9eff">balances</code></td><td>Live wallet balances</td></tr>
+<tr><td><code style="color:#4a9eff">swap</code></td><td>Token swaps via CLI</td></tr>
+<tr><td><code style="color:#4a9eff">portfolio-live</code></td><td>Balances + private reasoning</td></tr>
+</table>
+</div>
+
+<!-- ==================== OPEN WALLET STANDARD ==================== -->
+<div class="card">
+<h2>Open Wallet Standard</h2>
+<div class="stat-row"><span class="stat-label">Package</span><span class="stat-value">@open-wallet-standard/core</span></div>
+<div class="stat-row"><span class="stat-label">Version</span><span class="stat-value">v0.3.9</span></div>
+<div class="stat-row"><span class="stat-label">NAPI-RS Functions</span><span class="stat-value">14</span></div>
+<div class="stat-row"><span class="stat-label">Signatures</span><span class="stat-value">5 cryptographic</span></div>
+<div class="stat-row"><span class="stat-label">EIP-712</span><span class="stat-value green">Signed</span></div>
+<div class="stat-row"><span class="stat-label">Key Continuity</span><span class="stat-value green">Verified</span></div>
+<div style="margin-top:12px;font-size:12px;color:#888">7 Native Chains + 6 EVM L2s:</div>
+<div class="chain-list">
+<span class="chain-badge">Ethereum</span>
+<span class="chain-badge">Solana</span>
+<span class="chain-badge">Bitcoin</span>
+<span class="chain-badge">Cosmos</span>
+<span class="chain-badge">Tron</span>
+<span class="chain-badge">TON</span>
+<span class="chain-badge">Filecoin</span>
+<span class="chain-badge">Base</span>
+<span class="chain-badge">Arbitrum</span>
+<span class="chain-badge">Optimism</span>
+<span class="chain-badge">Polygon</span>
+<span class="chain-badge">Avalanche</span>
+<span class="chain-badge">BSC</span>
+</div>
+</div>
+
+<!-- ==================== ENS COMMUNICATION ==================== -->
+<div class="card">
+<h2>ENS Communication</h2>
+<div class="stat-row"><span class="stat-label">Network</span><span class="stat-value">Ethereum Mainnet (live)</span></div>
+<div class="stat-row"><span class="stat-label">Method</span><span class="stat-value">Pure JSON-RPC (no web3.py)</span></div>
+<div style="margin-top:12px;font-size:12px;color:#888">Resolutions:</div>
+<table class="mini-table">
+<tr><td><span class="green">FORWARD</span> vitalik.eth</td><td style="font-size:10px">0xd8dA6BF2...96045</td></tr>
+<tr><td><span class="green">FORWARD</span> nick.eth</td><td style="font-size:10px">0xb8c2C29e...67d5</td></tr>
+<tr><td><span class="blue">REVERSE</span> 0xd8dA...96045</td><td style="font-size:10px">vitalik.eth</td></tr>
+</table>
+<div class="stat-row" style="margin-top:8px"><span class="stat-label">Reverse Verified</span><span class="stat-value green">Yes</span></div>
+</div>
+
+<!-- ==================== STATUS NETWORK GASLESS ==================== -->
+<div class="card">
+<h2>Status Network Gasless</h2>
+<div class="stat-row"><span class="stat-label">Gas Cost</span><span class="stat-value green">ZERO</span></div>
+<div class="stat-row"><span class="stat-label">Network</span><span class="stat-value">Status Sepolia</span></div>
+<div class="stat-row"><span class="stat-label">Contract</span><span class="stat-value"><span class="addr"><a href="https://sepoliascan.status.network/address/0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3" target="_blank">0x51C96F...Ba3</a></span></span></div>
+<div class="stat-row"><span class="stat-label">Type</span><span class="stat-value">VaultGuard Token (ERC-20)</span></div>
+<div class="stat-row"><span class="stat-label">Deployment</span><span class="stat-value green">Zero gas fee</span></div>
+</div>
+
+<!-- ==================== SECTION: VERIFICATION ==================== -->
+<div class="section-divider">Verification &amp; Testing</div>
+
+<!-- ==================== TESTS ==================== -->
+<div class="card">
+<h2>Test Suite</h2>
+<div class="counter green">33/33</div>
+<div class="counter-label">All Tests Passing</div>
+<div class="stat-row"><span class="stat-label">PrivacyVault</span><span class="stat-value green">13 passing</span></div>
+<div class="stat-row"><span class="stat-label">VaultGuardSliceHook</span><span class="stat-value green">20 passing</span></div>
+<div class="stat-row"><span class="stat-label">Framework</span><span class="stat-value">Hardhat + Chai</span></div>
+<div class="stat-row"><span class="stat-label">Solidity</span><span class="stat-value">0.8.20</span></div>
+</div>
+
+<!-- ==================== PROOF FILES ==================== -->
+<div class="card">
+<h2>Proof Files</h2>
+<div class="proof-grid">
+<div class="proof-item">
+<div class="name">privacy_proof.json</div>
+4 sessions, hash chains
+</div>
+<div class="proof-item">
+<div class="name">olas_mech_proof.json</div>
+14 requests, IPFS hashes
+</div>
+<div class="proof-item">
+<div class="name">lit_action_proof.json</div>
+3 action types, TEE verified
+</div>
+<div class="proof-item">
+<div class="name">slice_hook_deploy_proof.json</div>
+Contracts + demo purchase
+</div>
+<div class="proof-item">
+<div class="name">moonpay_cli_proof.json</div>
+92 tools, live API tests
+</div>
+<div class="proof-item">
+<div class="name">ows_proof.json</div>
+14 functions, 13 chains
+</div>
+<div class="proof-item">
+<div class="name">ens_proof.json</div>
+Mainnet resolution proof
 </div>
 </div>
 </div>
+
+<!-- ==================== MARKEE GITHUB ==================== -->
+<div class="card">
+<h2>Markee GitHub Integration</h2>
+<div class="stat-row"><span class="stat-label">Platform</span><span class="stat-value"><a href="https://markee.xyz" target="_blank" style="color:#4a9eff;text-decoration:none">markee.xyz</a></span></div>
+<div class="stat-row"><span class="stat-label">Purpose</span><span class="stat-value">Open source funding</span></div>
+<div class="stat-row"><span class="stat-label">Repository</span><span class="stat-value">vaultguard-agent</span></div>
+</div>
+
+<!-- ==================== LINKS ==================== -->
+<div class="card full-width">
+<h2>Links</h2>
+<div class="links-row">
+<a href="https://github.com/devanshug2307/vaultguard-agent" target="_blank">GitHub</a>
+<a href="https://www.moltbook.com/u/autofundagent" target="_blank">Moltbook Profile</a>
+<a href="https://www.moltbook.com/post/f773f1e8-62ef-41fe-8ebf-89208ef78c87" target="_blank">Moltbook Post</a>
+<a href="https://sepolia.basescan.org/address/0x3AeDD41999383E9a351B0Cb984D5Bb8eac3AAB28" target="_blank">PrivacyVault (BaseScan)</a>
+<a href="https://sepolia.basescan.org/address/0x8BC511BC3A63DB615Ab2d906Ba9C2A6EF79687b9" target="_blank">SliceHook (BaseScan)</a>
+<a href="https://sepoliascan.status.network/address/0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3" target="_blank">VaultGuard Token (Status)</a>
+<a href="https://markee.xyz" target="_blank">Markee Funding</a>
+</div>
+</div>
+
+</div>
+
 <div style="text-align:center;padding:32px;color:#444;font-size:12px">
-VaultGuard — The Synthesis 2026 — Built by Devanshu Goyal<br>
-<a href="https://github.com/devanshug2307/vaultguard-agent" style="color:#4a9eff" target="_blank">GitHub</a>
+VaultGuard &mdash; The Synthesis 2026 &mdash; Built by Devanshu Goyal<br>
+<span style="color:#333;font-size:11px">12 integrations &middot; Private reasoning with public verifiable actions</span>
 </div>
 </body>
 </html>
