@@ -24,5 +24,8 @@
     "@nomicfoundation/hardhat-toolbox": "^6.1.2",
     "@openzeppelin/contracts": "^5.6.1",
     "hardhat": "^2.28.6"
+  },
+  "dependencies": {
+    "@open-wallet-standard/core": "^0.3.9"
   }
 }

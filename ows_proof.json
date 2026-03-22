@@ -1,0 +1,232 @@
+{
+  "ows_version": "0.3.9",
+  "package": "@open-wallet-standard/core",
+  "author": "MoonPay Engineering",
+  "timestamp": "2026-03-22T07:44:31.822Z",
+  "platform": "darwin-arm64",
+  "node_version": "v22.18.0",
+  "functions_available": [
+    "generateMnemonic",
+    "deriveAddress",
+    "createWallet",
+    "importWalletMnemonic",
+    "importWalletPrivateKey",
+    "listWallets",
+    "getWallet",
+    "deleteWallet",
+    "exportWallet",
+    "renameWallet",
+    "signTransaction",
+    "signMessage",
+    "signTypedData",
+    "signAndSend"
+  ],
+  "function_count": 14,
+  "steps": [
+    {
+      "step": 1,
+      "action": "generateMnemonic",
+      "result": {
+        "word_count": 12,
+        "preview": "airport walk visit ..."
+      }
+    },
+    {
+      "step": 2,
+      "action": "createWallet",
+      "result": {
+        "wallet_id": "f4b54fd7-1b8c-49c1-a508-59225faba26d",
+        "wallet_name": "vaultguard-agent",
+        "created_at": "2026-03-22T07:44:31.927932+00:00",
+        "chains_derived": 7,
+        "accounts": [
+          {
+            "chain_id": "eip155:1",
+            "address": "0x98Fa586C7b75Cde346904765B47850c86615da5D",
+            "derivation_path": "m/44'/60'/0'/0/0"
+          },
+          {
+            "chain_id": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            "address": "2EcXAp4ofEWbZD3axZThmFquLAoWY4ca9ChELESeoEG5",
+            "derivation_path": "m/44'/501'/0'/0'"
+          },
+          {
+            "chain_id": "bip122:000000000019d6689c085ae165831e93",
+            "address": "bc1q8ykj63en5e38awukfg9yjsjampt9fmy2rxhghe",
+            "derivation_path": "m/84'/0'/0'/0/0"
+          },
+          {
+            "chain_id": "cosmos:cosmoshub-4",
+            "address": "cosmos1fe464tqdzeehekvk6n5u4e9a6ta7jyafagjjsv",
+            "derivation_path": "m/44'/118'/0'/0/0"
+          },
+          {
+            "chain_id": "tron:mainnet",
+            "address": "TAXJxuV4v7txwhvS1PH1FdMgkid7YcuN7C",
+            "derivation_path": "m/44'/195'/0'/0/0"
+          },
+          {
+            "chain_id": "ton:mainnet",
+            "address": "UQBNtZHQR_lRYiCtl85XLvK_mYmolmPag25emp3U_Jg-L1B6",
+            "derivation_path": "m/44'/607'/0'"
+          },
+          {
+            "chain_id": "fil:mainnet",
+            "address": "f1id2v54vrfrx335bi4ek5v3ptuuygm5o55p7eapy",
+            "derivation_path": "m/44'/461'/0'/0/0"
+          }
+        ]
+      }
+    },
+    {
+      "step": 3,
+      "action": "listWallets",
+      "result": {
+        "count": 1,
+        "wallets": [
+          {
+            "name": "vaultguard-agent",
+            "id": "f4b54fd7-1b8c-49c1-a508-59225faba26d"
+          }
+        ]
+      }
+    },
+    {
+      "step": 4,
+      "action": "getWallet",
+      "result": {
+        "name": "vaultguard-agent",
+        "id": "f4b54fd7-1b8c-49c1-a508-59225faba26d",
+        "account_count": 7
+      }
+    },
+    {
+      "step": 5,
+      "action": "deriveAddress (EVM L2s)",
+      "result": {
+        "chains": [
+          "base",
+          "arbitrum",
+          "optimism",
+          "polygon",
+          "avalanche",
+          "bsc"
+        ],
+        "addresses": {
+          "base": "0x98Fa586C7b75Cde346904765B47850c86615da5D",
+          "arbitrum": "0x98Fa586C7b75Cde346904765B47850c86615da5D",
+          "optimism": "0x98Fa586C7b75Cde346904765B47850c86615da5D",
+          "polygon": "0x98Fa586C7b75Cde346904765B47850c86615da5D",
+          "avalanche": "0x98Fa586C7b75Cde346904765B47850c86615da5D",
+          "bsc": "0x98Fa586C7b75Cde346904765B47850c86615da5D"
+        }
+      }
+    },
+    {
+      "step": 6,
+      "action": "signMessage (multi-chain reasoning proof)",
+      "result": {
+        "reasoning_input_hash": "70c1e4e62e73fecb14c1b6424d7dc321f5bcccb083133a099fcc6e63de955c42",
+        "reasoning_output_hash": "d32a550614b5a53fa2f7966f5ce53e72e731b5960f9043fc251a66ed6e9bc58c",
+        "proof_hash": "cc30f8ad2d06eb52f0f36f772e9564e3f8184d421a03540b8fe66f86b351ad30",
+        "signatures": {
+          "evm": {
+            "signature": "4d2c79bb824f621bbdab135f9b7c83e64a7fbb5fc416db51423ad4a704ecd7e051d20f3fca10b1664c18890bfca0c5f5127b5ba9e50df1c5258611fe786bc77d1c",
+            "recovery_id": 28
+          },
+          "solana": {
+            "signature": "3b809cd948361f2b05c667ada0b929aa35128110ce5a4a67e7a6c335fec98c81a1ddfe230f16f9bfd312e70e6cdc7e2358caf764da707e4c0db30a8d34a72d0e"
+          },
+          "cosmos": {
+            "signature": "de737fcf571d049b232d926dfbfc175d03172facf60e96103309df5cba00637c1c3a4789c214dbf51ddc44c4407baea8c4f7541264dbd9bae0dd66d7060ea24c00",
+            "recovery_id": 0
+          }
+        }
+      }
+    },
+    {
+      "step": 7,
+      "action": "signTypedData (EIP-712 governance attestation)",
+      "result": {
+        "domain": {
+          "name": "VaultGuard",
+          "version": "1",
+          "chainId": 84532
+        },
+        "primary_type": "VaultGuardAttestation",
+        "message": {
+          "sessionId": "vg-0001-ows-demo",
+          "proofHash": "0xcc30f8ad2d06eb52f0f36f772e9564e3f8184d421a03540b8fe66f86b351ad30",
+          "action": "treasury_rebalance",
+          "timestamp": 1774165472
+        },
+        "signature": "7cc860a80f72e57e3c8af87be494a73c3dd3dbcda48ea528fc4775f3a702d8fb732d3567643791b1229fc6b911a40c3210738cef0d4448bbc1488d981de3413e1b",
+        "recovery_id": 27
+      }
+    },
+    {
+      "step": 8,
+      "action": "renameWallet",
+      "result": {
+        "old_name": "vaultguard-agent",
+        "new_name": "vaultguard-agent-primary"
+      }
+    },
+    {
+      "step": 9,
+      "action": "exportWallet + deleteWallet + importWalletMnemonic (round-trip)",
+      "result": {
+        "reimported_name": "vaultguard-agent-reimported",
+        "reimported_id": "17d916fd-89fb-463b-a983-f58b712dcb0f",
+        "accounts": 7,
+        "address_match": true
+      }
+    },
+    {
+      "step": 10,
+      "action": "signMessage after re-import (key continuity)",
+      "result": {
+        "signature_matches": true,
+        "original_sig": "4d2c79bb824f621bbdab135f9b7c83e64a7fbb5fc416db51423ad4a704ecd7e051d20f3fca10b1664c18890bfca0c5f5127b5ba9e50df1c5258611fe786bc77d1c",
+        "reimported_sig": "4d2c79bb824f621bbdab135f9b7c83e64a7fbb5fc416db51423ad4a704ecd7e051d20f3fca10b1664c18890bfca0c5f5127b5ba9e50df1c5258611fe786bc77d1c"
+      }
+    }
+  ],
+  "summary": {
+    "functions_used": [
+      "generateMnemonic",
+      "createWallet",
+      "listWallets",
+      "getWallet",
+      "deriveAddress",
+      "signMessage",
+      "signTypedData",
+      "exportWallet",
+      "renameWallet",
+      "importWalletMnemonic",
+      "deleteWallet"
+    ],
+    "functions_used_count": 11,
+    "chains_native": [
+      "Ethereum / EVM",
+      "Solana",
+      "Bitcoin",
+      "Cosmos Hub",
+      "Tron",
+      "TON",
+      "Filecoin"
+    ],
+    "chains_evm_l2": [
+      "base",
+      "arbitrum",
+      "optimism",
+      "polygon",
+      "avalanche",
+      "bsc"
+    ],
+    "total_chain_coverage": 13,
+    "signatures_created": 5,
+    "key_continuity_verified": true,
+    "eip712_signed": true
+  }
+}

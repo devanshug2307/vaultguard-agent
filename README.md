@@ -263,9 +263,55 @@ VaultGuard is deployed on Status Network Sepolia with zero gas fees, enabling fr
 - **Zero gas fees** make it ideal for high-frequency privacy proof commits
 - **Explorer:** [sepoliascan.status.network](https://sepoliascan.status.network)
 
-### OpenWallet Standard
+### OpenWallet Standard (OWS) — Agent Wallet Infrastructure
 
-VaultGuard's CLI agent implements the OpenWallet Standard pattern — a unified interface for wallet operations across multiple chains. The `MoonPayMCPBridge` provides standardized access to wallet balances, token swaps, cross-chain bridges, token discovery, and market data across ethereum, base, polygon, arbitrum, optimism, solana, bnb, and avalanche via the MoonPay CLI MCP server.
+VaultGuard uses [`@open-wallet-standard/core`](https://www.npmjs.com/package/@open-wallet-standard/core) **v0.3.9** by **MoonPay Engineering** as its wallet infrastructure layer. OWS provides local-first, chain-agnostic wallet management through 14 native NAPI-RS functions -- the agent's private keys are encrypted at rest inside the OWS vault and never exposed to LLM context.
+
+**What OWS provides:**
+
+| Capability | OWS Function | VaultGuard Usage |
+|-----------|-------------|-----------------|
+| Mnemonic generation | `generateMnemonic` | BIP-39 seed for agent wallet |
+| Universal wallet | `createWallet` | 7-chain address derivation from single seed |
+| Multi-chain addresses | `deriveAddress` | EVM, Solana, Bitcoin, Cosmos, Tron, TON, Filecoin + 6 EVM L2s |
+| Reasoning proof signing | `signMessage` | Sign SHA-256 proof hashes on EVM, Solana, and Cosmos |
+| Governance attestation | `signTypedData` | EIP-712 structured data for onchain attestations |
+| Wallet lifecycle | `listWallets`, `getWallet`, `renameWallet` | Vault management |
+| Key portability | `exportWallet`, `importWalletMnemonic` | Backup and restore with address continuity verified |
+| Cleanup | `deleteWallet` | Secure vault cleanup |
+
+**Chain coverage (13 networks):**
+
+| Chain Family | Chain ID (CAIP-2) | Derivation Path |
+|-------------|-------------------|-----------------|
+| Ethereum / EVM | `eip155:1` | `m/44'/60'/0'/0/0` |
+| Solana | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` | `m/44'/501'/0'/0'` |
+| Bitcoin | `bip122:000000000019d6689c085ae165831e93` | `m/84'/0'/0'/0/0` |
+| Cosmos Hub | `cosmos:cosmoshub-4` | `m/44'/118'/0'/0/0` |
+| Tron | `tron:mainnet` | `m/44'/195'/0'/0/0` |
+| TON | `ton:mainnet` | `m/44'/607'/0'` |
+| Filecoin | `fil:mainnet` | `m/44'/461'/0'/0/0` |
+| Base, Arbitrum, Optimism, Polygon, Avalanche, BSC | Same EVM key | `m/44'/60'/0'/0/0` |
+
+**Security model:**
+- Agent keys encrypted at rest in OWS vault (AES-256)
+- Key material stays inside NAPI-RS native boundary -- never serialized to JS heap
+- Mnemonic never passed to LLM context or logged
+- Signing happens through OWS `signMessage` / `signTypedData` -- agent code never touches raw private keys
+
+**How VaultGuard uses OWS for reasoning proofs:**
+1. Private reasoning produces `input_hash` and `output_hash` (SHA-256)
+2. Proof payload: `vaultguard:reasoning:<input_hash>:<output_hash>`
+3. OWS `signMessage` signs the proof hash on EVM, Solana, and Cosmos
+4. OWS `signTypedData` creates EIP-712 `VaultGuardAttestation` for onchain verification
+5. Signatures prove the agent endorsed the reasoning output without exposing the input
+
+```bash
+# Run the OWS wallet integration demo
+node src/ows_wallet.cjs --test
+```
+
+**Proof:** See [`ows_proof.json`](ows_proof.json) for the full execution trace with real wallet creation, multi-chain derivation, 5 cryptographic signatures, and key continuity verification.
 
 ### ENS Communication
 
@@ -326,6 +372,7 @@ python3 src/ens_resolver.py
 # Run integrations
 python3 src/olas_service.py          # Olas marketplace service
 python3 src/commerce_privacy.py      # Commerce privacy engine
+node src/ows_wallet.cjs --test       # OWS wallet integration (generates ows_proof.json)
 python3 src/cli_agent.py describe    # CLI agent capabilities
 ```
 
@@ -347,7 +394,8 @@ vaultguard-agent/
 │   ├── olas_service.py               # Olas Pearl-compatible service component
 │   ├── olas_service_descriptor.json  # Olas service descriptor (capabilities, pricing)
 │   ├── commerce_privacy.py           # Commerce privacy engine (Slice/Future of Commerce)
-│   └── cli_agent.py                  # CLI agent with MoonPayMCPBridge (MoonPay CLI MCP)
+│   ├── cli_agent.py                  # CLI agent with MoonPayMCPBridge (MoonPay CLI MCP)
+│   └── ows_wallet.cjs               # OpenWallet Standard integration (7-chain wallet, signing)
 ├── test/
 │   ├── PrivacyVault.test.cjs         # 13 tests
 │   └── VaultGuardSliceHook.test.cjs  # 20 tests (pricing, gating, proofs, admin)
@@ -359,6 +407,7 @@ vaultguard-agent/
 ├── privacy_proof.json                # Proof of private computation
 ├── ens_proof.json                    # Proof of real ENS resolution (mainnet RPC)
 ├── moonpay_cli_proof.json            # Proof of MoonPay CLI v1.12.4 install + 92 tools verified
+├── ows_proof.json                    # Proof of OWS wallet ops (7 chains, 5 signatures, key continuity)
 ├── slice_hook_deploy_proof.json      # Proof of Slice Hook deployment on Base Sepolia
 ├── hardhat.config.cjs
 ├── README.md
