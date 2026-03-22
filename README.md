@@ -245,10 +245,34 @@ vaultguard-agent/
 └── requirements.txt
 ```
 
+### Markee GitHub Integration
+
+VaultGuard is integrated with [Markee](https://markee.xyz) — open source digital real estate that funds the open internet. Markee enables sustainable funding for open source projects by embedding sponsored messages directly in repository markdown files.
+
+**How it works:**
+1. A Markee "sign" is deployed onchain, linked to this GitHub repo via OAuth
+2. The delimiter tags below define where the Markee message appears
+3. Supporters and sponsors can purchase message space, with funds split between the project (62%) and the Markee Cooperative (38%)
+4. Judging is fully objective: based on views and monetization metrics
+
+**Setup (manual steps required):**
+1. Go to [markee.xyz](https://markee.xyz) and connect your GitHub account
+2. Grant OAuth permissions to the `vaultguard-agent` repository
+3. Create a Markee sign and select your pricing strategy
+4. Copy the generated delimiter tags (with your unique Ethereum address) and replace the placeholder below
+5. Verify the repo appears as "Live" on [markee.xyz/ecosystem/platforms/github](https://markee.xyz/ecosystem/platforms/github)
+
+<!-- MARKEE:START -->
+> **Sponsored by [Markee](https://markee.xyz)** — Fund open source projects by purchasing this message space. VaultGuard: Private AI reasoning with public verifiable actions.
+>
+> [Purchase this message on the Markee App](https://markee.xyz)
+<!-- MARKEE:END -->
+
 ## Links
 
 - **Dashboard:** [devanshug2307.github.io/vaultguard-agent](https://devanshug2307.github.io/vaultguard-agent/)
 - **GitHub:** [github.com/devanshug2307/vaultguard-agent](https://github.com/devanshug2307/vaultguard-agent)
+- **Markee:** [markee.xyz/ecosystem/platforms/github](https://markee.xyz/ecosystem/platforms/github)
 
 ## Built By
 
