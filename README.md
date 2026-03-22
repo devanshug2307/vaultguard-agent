@@ -6,6 +6,10 @@
 
 **Live Dashboard:** [devanshug2307.github.io/vaultguard-agent](https://devanshug2307.github.io/vaultguard-agent/)
 
+![VaultGuard Dashboard — Privacy Model, Sessions, Contracts](dashboard_screenshot_1.png)
+
+![VaultGuard Dashboard — Olas, Lit Protocol, Slice, MoonPay, OWS, ENS](dashboard_screenshot_2.png)
+
 ---
 
 ## Problem
