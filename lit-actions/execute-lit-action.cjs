@@ -28,9 +28,13 @@ async function main() {
     await litNodeClient.connect();
     console.log("   Connected to Lit Network!\n");
   } catch (e) {
-    console.log(`   Connection note: ${e.message}`);
-    console.log("   (This is expected without proper auth setup)\n");
-    console.log("   Demonstrating the integration pattern instead:\n");
+    console.log(`   Connection note: ${e.message}\n`);
+    console.log("   To execute inside the Chipotle TEE, you need:");
+    console.log("     1. A Lit auth session (PKP NFT mint or wallet auth signature)");
+    console.log("     2. The @lit-protocol/lit-node-client SDK installed");
+    console.log("     3. Access to the datil-dev network\n");
+    console.log("   See: https://developer.litprotocol.com/sdk/authentication\n");
+    console.log("   Demonstrating the integration pattern with expected outputs:\n");
   }
 
   // 2. Load the Lit Action code

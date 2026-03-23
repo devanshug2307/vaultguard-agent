@@ -613,16 +613,29 @@ def cmd_moonpay_status(args):
 
 
 def cmd_balances(args):
-    """Fetch live wallet balances via MoonPay CLI."""
+    """
+    Fetch live wallet balances via MoonPay CLI.
+
+    Requires MoonPay CLI authentication. The CLI communicates via MCP
+    (JSON-RPC 2.0 over stdio) to call the token_balance_list tool.
+    Balances are fetched as public on-chain data -- no private reasoning
+    is involved in this step.
+    """
     mp = get_moonpay()
 
     if not mp.is_available():
-        print("  MoonPay CLI not installed. Run: npm install -g @moonpay/cli", file=sys.stderr)
+        print("  MoonPay CLI (`mp`) is not installed.", file=sys.stderr)
+        print("  Install: npm install -g @moonpay/cli", file=sys.stderr)
+        print("  Then:    mp login --email <your-email>", file=sys.stderr)
+        print("\n  Tip: Run 'python3 src/cli_agent.py demo' to see the full pipeline without auth.", file=sys.stderr)
         sys.exit(1)
 
     if not mp.connect():
-        print("  Could not connect to MoonPay MCP server.", file=sys.stderr)
-        print("  Make sure you are authenticated: mp login --email <email>", file=sys.stderr)
+        print("  Could not connect to MoonPay MCP server (`mp mcp`).", file=sys.stderr)
+        print("  The CLI is installed but authentication is required.", file=sys.stderr)
+        print("  Authenticate: mp login --email <your-email>", file=sys.stderr)
+        print("  Create wallet: mp wallet create --name vaultguard", file=sys.stderr)
+        print("\n  Tip: Run 'python3 src/cli_agent.py demo' to see the full pipeline without auth.", file=sys.stderr)
         sys.exit(1)
 
     wallet = args.wallet
@@ -646,15 +659,26 @@ def cmd_balances(args):
 
 
 def cmd_swap(args):
-    """Execute a token swap via MoonPay CLI."""
+    """
+    Execute a token swap via MoonPay CLI.
+
+    Requires MoonPay CLI authentication with a wallet configured.
+    The swap is a public on-chain action executed through MoonPay's
+    token_swap MCP tool. No private reasoning data is sent to MoonPay.
+    """
     mp = get_moonpay()
 
     if not mp.is_available():
-        print("  MoonPay CLI not installed. Run: npm install -g @moonpay/cli", file=sys.stderr)
+        print("  MoonPay CLI (`mp`) is not installed.", file=sys.stderr)
+        print("  Install: npm install -g @moonpay/cli", file=sys.stderr)
+        print("  Then:    mp login --email <your-email>", file=sys.stderr)
         sys.exit(1)
 
     if not mp.connect():
-        print("  Could not connect to MoonPay MCP server.", file=sys.stderr)
+        print("  Could not connect to MoonPay MCP server (`mp mcp`).", file=sys.stderr)
+        print("  The CLI is installed but authentication is required.", file=sys.stderr)
+        print("  Authenticate: mp login --email <your-email>", file=sys.stderr)
+        print("  Create wallet: mp wallet create --name vaultguard", file=sys.stderr)
         sys.exit(1)
 
     # First resolve token symbols to addresses if needed
@@ -687,7 +711,16 @@ def cmd_swap(args):
 def cmd_portfolio_live(args):
     """
     Fetch live balances via MoonPay CLI, then run VaultGuard private analysis.
-    This is the key integration: live on-chain data + private reasoning.
+
+    This is the key integration point demonstrating the privacy pipeline:
+      1. MoonPay CLI fetches live on-chain balances (public data retrieval)
+      2. VaultGuard's PrivateReasoner hashes the balance data (SHA-256)
+      3. Reasoning runs in-memory only (Venice API or local fallback)
+      4. Only public-safe recommendations are output
+      5. Raw balance data is discarded after hashing -- never persisted
+
+    MoonPay is used solely as a public data source. No sensitive reasoning
+    or private portfolio strategy ever flows to MoonPay.
     """
     reasoner = get_reasoner(args.api_key or "")
     mp = get_moonpay()
@@ -713,7 +746,10 @@ def cmd_portfolio_live(args):
         finally:
             mp.disconnect()
     else:
-        print(f"  [1/3] MoonPay CLI not available, using provided data only")
+        print(f"  [1/3] MoonPay CLI not available -- requires authentication")
+        print(f"        Install: npm install -g @moonpay/cli")
+        print(f"        Auth:    mp login --email <your-email>")
+        print(f"        Using provided data only")
 
     # Step 2: Run private reasoning on the balance data
     print(f"  [2/3] Running private analysis...")
@@ -737,6 +773,101 @@ def cmd_portfolio_live(args):
         print(f"    {i}. {a}")
     print()
     print(f"  (Raw balances hashed and discarded -- only recommendations are public)")
+    print()
+
+
+def cmd_demo(args):
+    """
+    Run a full demonstration of VaultGuard's MoonPay CLI integration.
+
+    Shows the complete privacy pipeline without requiring MoonPay authentication:
+      - Simulated live balance fetch (what MoonPay would return)
+      - Private reasoning over the portfolio data
+      - Public-safe output with cryptographic proof
+
+    This is useful for judges, reviewers, and developers who want to see
+    the end-to-end flow without needing MoonPay credentials.
+    """
+    reasoner = get_reasoner(args.api_key or "")
+
+    print(f"\n  VaultGuard MoonPay Integration Demo")
+    print(f"  {'=' * 50}")
+    print(f"  Mode: demonstration (no MoonPay auth required)\n")
+
+    # Step 1: Show what MoonPay CLI provides
+    print(f"  [1/5] MoonPay CLI Capabilities (92 MCP tools):")
+    print(f"        - token_balance_list: Fetch wallet balances across chains")
+    print(f"        - token_swap: Swap tokens on the same chain")
+    print(f"        - token_bridge: Bridge tokens across chains")
+    print(f"        - token_search: Discover tokens by name/symbol")
+    print(f"        - token_trending_list: Find trending tokens")
+    print(f"        - prediction_market_*: Trade on Polymarket/Kalshi")
+    print(f"        - wallet_*: Manage wallets and keys")
+    print()
+
+    # Step 2: Simulate balance data (what MoonPay would return)
+    print(f"  [2/5] Simulated live balance data (from MoonPay CLI):")
+    simulated_balances = {
+        "ethereum": {
+            "ETH": {"balance": "2.45", "usd_value": "8575.00"},
+            "USDC": {"balance": "5000.00", "usd_value": "5000.00"},
+            "stETH": {"balance": "1.20", "usd_value": "4200.00"},
+        },
+        "base": {
+            "ETH": {"balance": "0.50", "usd_value": "1750.00"},
+            "USDC": {"balance": "2000.00", "usd_value": "2000.00"},
+        },
+        "polygon": {
+            "MATIC": {"balance": "1500.00", "usd_value": "975.00"},
+            "USDC": {"balance": "1000.00", "usd_value": "1000.00"},
+        },
+    }
+    for chain, tokens in simulated_balances.items():
+        print(f"        {chain}:")
+        for token, data in tokens.items():
+            print(f"          {token}: {data['balance']} (${data['usd_value']})")
+    print()
+
+    # Step 3: Privacy pipeline
+    print(f"  [3/5] Privacy pipeline:")
+    sensitive_data = json.dumps({
+        "wallet": "0xdemo...1234",
+        "chains": list(simulated_balances.keys()),
+        "balances": simulated_balances,
+        "total_usd": "$23,500",
+        "request": "Analyze portfolio composition and recommend rebalancing strategy",
+    })
+    print(f"        Input data: {len(sensitive_data)} bytes of sensitive portfolio data")
+
+    session = reasoner.reason_privately(sensitive_data, "treasury_strategy")
+
+    print(f"        Input hash:     {session.input_hash[:32]}... (data NOT stored)")
+    print(f"        Reasoning hash: {session.reasoning_hash[:32]}... (proves computation)")
+    print(f"        Model:          {session.model_used}")
+    print(f"        Privacy mode:   {session.privacy_mode}")
+    print()
+
+    # Step 4: Public-safe output
+    print(f"  [4/5] Public-safe output (only this leaves VaultGuard):")
+    print(f"        Session: {session.session_id}")
+    print(f"        Actions:")
+    for i, action in enumerate(session.output_actions, 1):
+        print(f"          {i}. {action}")
+    print()
+
+    # Step 5: Verification
+    proof = reasoner.verify_session(session)
+    print(f"  [5/5] Verification:")
+    print(f"        Verified: {proof['verified']}")
+    print(f"        Proof:    {proof['proof'][:80]}...")
+    print()
+
+    print(f"  Privacy Guarantees:")
+    print(f"    - Raw balance data (from MoonPay): HASHED and discarded after analysis")
+    print(f"    - Reasoning steps: IN-MEMORY ONLY, never persisted")
+    print(f"    - Output: PUBLIC-SAFE summaries and actions only")
+    print(f"    - MoonPay: used solely for public on-chain data retrieval")
+    print(f"    - No sensitive data ever flows to MoonPay")
     print()
 
 
@@ -811,6 +942,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_live.add_argument("--chains", default="ethereum,base,polygon",
                         help="Comma-separated chain names")
     p_live.set_defaults(func=cmd_portfolio_live)
+
+    # demo (full pipeline demo without MoonPay auth)
+    p_demo = sub.add_parser("demo",
+                            help="Run a full demo of the MoonPay + private reasoning pipeline "
+                                 "(no MoonPay auth required)")
+    p_demo.set_defaults(func=cmd_demo)
 
     return parser
 

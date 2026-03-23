@@ -19,6 +19,10 @@ try {
   Hash = require("ipfs-only-hash");
 } catch (_) {
   Hash = null;
+  console.warn(
+    "[WARN] ipfs-only-hash not installed. Install with: npm install ipfs-only-hash\n" +
+    "       Falling back to SHA-256 content hash (not a real IPFS CID).\n"
+  );
 }
 
 async function computeIpfsCid(content) {
@@ -32,6 +36,13 @@ async function computeIpfsCid(content) {
 
 async function main() {
   const actionPath = path.join(__dirname, "vaultguard-private-reasoning.js");
+
+  if (!fs.existsSync(actionPath)) {
+    console.error(`ERROR: Lit Action file not found at ${actionPath}`);
+    console.error("Make sure vaultguard-private-reasoning.js exists in the lit-actions/ directory.");
+    process.exit(1);
+  }
+
   const actionCode = fs.readFileSync(actionPath, "utf8");
 
   console.log("=== VaultGuard Lit Action IPFS Deployment ===\n");

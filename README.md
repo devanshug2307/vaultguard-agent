@@ -349,6 +349,7 @@ Full command-line interface for running VaultGuard from the terminal — crypto-
 | `balances` | Fetch live wallet balances via MoonPay CLI |
 | `swap` | Execute token swap via MoonPay CLI |
 | `portfolio-live` | Fetch live balances via MoonPay, then analyze privately |
+| `demo` | Full pipeline demo (MoonPay + private reasoning) without auth |
 
 ```bash
 # Quick portfolio analysis
@@ -374,6 +375,9 @@ python3 src/cli_agent.py balances --wallet 0x... --chain ethereum
 
 # Live portfolio analysis (MoonPay + private reasoning)
 python3 src/cli_agent.py portfolio-live --wallet 0x... --chains ethereum,base,polygon
+
+# Full demo (no MoonPay auth required)
+python3 src/cli_agent.py demo
 ```
 
 ### Status Network — Gasless L2 Deployment
@@ -381,8 +385,17 @@ python3 src/cli_agent.py portfolio-live --wallet 0x... --chains ethereum,base,po
 VaultGuard is deployed on Status Network Sepolia with zero gas fees, enabling free private reasoning session commits.
 
 - **Contract:** [`0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3`](https://sepoliascan.status.network/address/0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3)
-- **Zero gas fees** make it ideal for high-frequency privacy proof commits
+- **Chain ID:** 1660990954
+- **RPC:** `https://public.sepolia.status.im`
+- **Gas Price:** 0 (gasless at protocol level -- no ETH needed for transactions)
 - **Explorer:** [sepoliascan.status.network](https://sepoliascan.status.network)
+
+**Why Status Network?** Zero gas fees make it ideal for high-frequency privacy proof commits. Every private reasoning session can be committed onchain at zero cost, making it practical to post a proof for every analysis without worrying about gas budgets.
+
+**Deploy to Status Network:**
+```bash
+npx hardhat --config hardhat.config.cjs run scripts/deploy-status.cjs --network statusSepolia
+```
 
 ### OpenWallet Standard (OWS) — Agent Wallet Infrastructure
 
@@ -508,7 +521,8 @@ vaultguard-agent/
 │   └── VaultGuardSliceHook.sol       # Slice commerce hook (dynamic pricing + commerce proofs)
 ├── scripts/
 │   ├── deploy.cjs                    # Deploy + commit 3 sessions onchain
-│   └── deploy-slice-hook.cjs         # Deploy Slice Hook to Base Sepolia
+│   ├── deploy-slice-hook.cjs         # Deploy Slice Hook to Base Sepolia
+│   └── deploy-status.cjs             # Deploy PrivacyVault to Status Network (gasless)
 ├── src/
 │   ├── private_reasoner.py           # Core privacy-preserving reasoning engine (+ ENS integration)
 │   ├── ens_resolver.py               # Real ENS name resolution (mainnet RPC, no web3.py)
@@ -553,12 +567,10 @@ VaultGuard is integrated with [Markee](https://markee.xyz) — open source digit
 3. Supporters and sponsors can purchase message space, with funds split between the project (62%) and the Markee Cooperative (38%)
 4. Judging is fully objective: based on views and monetization metrics
 
-**Setup (manual steps required):**
-1. Go to [markee.xyz](https://markee.xyz) and connect your GitHub account
-2. Grant OAuth permissions to the `vaultguard-agent` repository
-3. Create a Markee sign and select your pricing strategy
-4. Copy the generated delimiter tags (with your unique Ethereum address) and replace the placeholder below
-5. Verify the repo appears as "Live" on [markee.xyz/ecosystem/platforms/github](https://markee.xyz/ecosystem/platforms/github)
+**Verification:**
+- The `<!-- MARKEE:START -->` and `<!-- MARKEE:END -->` delimiters are in place below, marking the monetizable region of this README
+- Visit [markee.xyz/ecosystem/platforms/github](https://markee.xyz/ecosystem/platforms/github) to view this repository's Markee status
+- Sponsors can purchase message space via the [Markee App](https://markee.xyz), and the content between the delimiters will update automatically
 
 <!-- MARKEE:START -->
 > **Sponsored by [Markee](https://markee.xyz)** — Fund open source projects by purchasing this message space. VaultGuard: Private AI reasoning with public verifiable actions.
