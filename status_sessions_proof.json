@@ -1,0 +1,55 @@
+{
+  "description": "VaultGuard reasoning sessions committed to PrivacyVault on Status Network Sepolia",
+  "network": {
+    "name": "Status Network Sepolia",
+    "chainId": 1660990954,
+    "rpcUrl": "https://public.sepolia.rpc.status.network",
+    "explorer": "https://sepoliascan.status.network",
+    "gasPrice": 0,
+    "gasless": true
+  },
+  "contract": {
+    "name": "PrivacyVault",
+    "address": "0xDcb6aEdb34b7c91F3b83a0Bf61c7d84DB2f9F2bF",
+    "explorerUrl": "https://sepoliascan.status.network/address/0xDcb6aEdb34b7c91F3b83a0Bf61c7d84DB2f9F2bF"
+  },
+  "signer": "0x54eeFbb7b3F701eEFb7fa99473A60A6bf5fE16D7",
+  "sessionsCommitted": 3,
+  "totalSessionsOnContract": "3",
+  "sessions": [
+    {
+      "label": "session-1",
+      "sessionId": "0",
+      "inputHash": "0x3df0f000d8079a23eeb3eb4e4f8dc2ddff576281bb8e34ddec151fd60db5c68d",
+      "reasoningHash": "0x40b3e4fc2193d494c8aaede44aba636a48f5f4b442261ffb1123e9a99605b503",
+      "action": "REBALANCE: Reduce volatile exposure 15%, increase stablecoin yield positions",
+      "txHash": "0x1176db4f204443335e99594e1c97d57cf9d43b549ff0da9c7b96067f20ce7e44",
+      "blockNumber": 18176257,
+      "gasUsed": "254095",
+      "explorerUrl": "https://sepoliascan.status.network/tx/0x1176db4f204443335e99594e1c97d57cf9d43b549ff0da9c7b96067f20ce7e44"
+    },
+    {
+      "label": "session-2",
+      "sessionId": "1",
+      "inputHash": "0x05fdfbae6e6de4b0c5fc25dae29b977feed3055fba6fe174cf3caa71d1699f52",
+      "reasoningHash": "0x4ee7ec69764699e3f02382cdba57eb8d0792a0321343ca03c8085e000fef5721",
+      "action": "VOTE: Support proposal #42 with amendment for security audit requirement",
+      "txHash": "0xa3fbe574b3c319464086f9fcb38499d26f46b685f24bd98990a845c256f0cbbc",
+      "blockNumber": 18176259,
+      "gasUsed": "239747",
+      "explorerUrl": "https://sepoliascan.status.network/tx/0xa3fbe574b3c319464086f9fcb38499d26f46b685f24bd98990a845c256f0cbbc"
+    },
+    {
+      "label": "session-3",
+      "sessionId": "2",
+      "inputHash": "0x649e3fad12732c80beeb45c5d95d267db3bb85c7a71470062f77ae93fcfa2f4d",
+      "reasoningHash": "0x8bda3ac95bfe88047013294656fb4ca17615cedab96d6c31a53acff5ce70fe4c",
+      "action": "EVALUATE: Counter-offer at 12% discount with 6-month vesting schedule",
+      "txHash": "0x4588e7bc8980249994ea15e31e058a92529d88e210a1c6942cdfce8c3e95d26c",
+      "blockNumber": 18176261,
+      "gasUsed": "239723",
+      "explorerUrl": "https://sepoliascan.status.network/tx/0x4588e7bc8980249994ea15e31e058a92529d88e210a1c6942cdfce8c3e95d26c"
+    }
+  ],
+  "timestamp": "2026-03-23T07:15:29.207Z"
+}
