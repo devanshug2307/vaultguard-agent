@@ -167,9 +167,13 @@ Every private reasoning session is committed onchain with hashes (never raw data
 
 ## Tests
 
-**33/33 passing** (13 PrivacyVault + 20 VaultGuardSliceHook) — run with:
+**60 tests passing (33 Solidity + 27 Python)** — 13 PrivacyVault + 20 VaultGuardSliceHook + 27 Python — run with:
 ```bash
+# Solidity tests (33/33)
 npx hardhat --config hardhat.config.cjs test
+
+# Python tests (27)
+python3 -m pytest tests/ -v
 ```
 
 ## Integrations
@@ -521,6 +525,12 @@ git clone https://github.com/devanshug2307/vaultguard-agent.git
 cd vaultguard-agent
 
 pip install httpx
+
+# Run Solidity tests (33/33)
+npx hardhat --config hardhat.config.cjs test
+
+# Run Python tests (27)
+python3 -m pytest tests/ -v
 
 # Run the core demo (4 private reasoning scenarios, including ENS)
 python3 src/private_reasoner.py
