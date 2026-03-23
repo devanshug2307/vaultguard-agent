@@ -1,0 +1,33 @@
+{
+  "proof_type": "moonpay_wallet_live",
+  "timestamp": "2026-03-23T07:27:39.329006Z",
+  "authenticated": true,
+  "wallets": [
+    {
+      "name": "vaultguard",
+      "type": "hd",
+      "addresses": {
+        "solana": "CrdDpdzSRhpQpKtcpbtP5KDZZeVscNk8TLgc9MNH2X1N",
+        "solana-devnet": "CrdDpdzSRhpQpKtcpbtP5KDZZeVscNk8TLgc9MNH2X1N",
+        "ethereum": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "base": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "arbitrum": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "polygon": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "optimism": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "bnb": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "avalanche": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "ethereum-sepolia": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "base-sepolia": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "arbitrum-sepolia": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "polygon-amoy": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "bitcoin": "bc1qznsss03htaaewt6nejle3cpwx4d9402x3kva7x",
+        "tron": "TAJMaGieBLkJa2GavUvUjRbgzWi2GqsZ24",
+        "ton": "UQDap5NRk975hTl8p0PCH2Lqcu8LdUH-fJE6TC_NcoQrXRo9",
+        "filecoin": "f1txc7xqedeo3lkwowyzwv5qtqfqfasqmxek7vpvy"
+      },
+      "createdAt": "2026-03-23T05:52:49.525082+00:00"
+    }
+  ],
+  "chain_count": 17,
+  "wallet_name": "vaultguard"
+}
