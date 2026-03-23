@@ -1,0 +1,19 @@
+{
+  "deployment": "PrivacyVault on Status Network Sepolia",
+  "network": {
+    "name": "Status Network Sepolia",
+    "chainId": 1660990954,
+    "rpcUrl": "https://public.sepolia.rpc.status.network",
+    "explorer": "https://sepoliascan.status.network",
+    "gasPrice": 0,
+    "gasless": true
+  },
+  "contract": {
+    "name": "PrivacyVault",
+    "address": "0xDcb6aEdb34b7c91F3b83a0Bf61c7d84DB2f9F2bF",
+    "deployTxHash": "0xaa1b031913ad39460ee6638dd0d23eb1904ff0753f2d54bc84503f9f5fa82371",
+    "explorerUrl": "https://sepoliascan.status.network/address/0xDcb6aEdb34b7c91F3b83a0Bf61c7d84DB2f9F2bF"
+  },
+  "deployer": "0x54eeFbb7b3F701eEFb7fa99473A60A6bf5fE16D7",
+  "timestamp": "2026-03-23T06:14:25.121Z"
+}

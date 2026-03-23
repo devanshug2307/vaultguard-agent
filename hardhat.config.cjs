@@ -13,7 +13,7 @@ module.exports = {
       chainId: 84532,
     },
     statusSepolia: {
-      url: "https://public.sepolia.status.im",
+      url: "https://public.sepolia.rpc.status.network",
       chainId: 1660990954,
       accounts: [PRIVATE_KEY],
       gasPrice: 0,

@@ -144,7 +144,7 @@ Every session generates verifiable proof:
 | PrivacyVault | Base Sepolia | [`0x3AeDD41999383E9a351B0Cb984D5Bb8eac3AAB28`](https://sepolia.basescan.org/address/0x3AeDD41999383E9a351B0Cb984D5Bb8eac3AAB28) |
 | VaultGuardSliceHook | Base Sepolia | [`0x8BC511BC3A63DB615Ab2d906Ba9C2A6EF79687b9`](https://sepolia.basescan.org/address/0x8BC511BC3A63DB615Ab2d906Ba9C2A6EF79687b9) |
 | PrivacyVault (Slice Hook) | Base Sepolia | [`0x090FdF20D68fEA1923f9Af132086837c876a0102`](https://sepolia.basescan.org/address/0x090FdF20D68fEA1923f9Af132086837c876a0102) |
-| VaultGuard Token | Status Network Sepolia | [`0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3`](https://sepoliascan.status.network/address/0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3) |
+| PrivacyVault | Status Network Sepolia | [`0xDcb6aEdb34b7c91F3b83a0Bf61c7d84DB2f9F2bF`](https://sepoliascan.status.network/address/0xDcb6aEdb34b7c91F3b83a0Bf61c7d84DB2f9F2bF) |
 
 ## Onchain Proof
 
@@ -325,13 +325,15 @@ node -e "require('ipfs-only-hash').of(require('fs').readFileSync('lit-actions/va
 
 Full command-line interface for running VaultGuard from the terminal — crypto-native portfolio analysis with private reasoning. The CLI uses `MoonPayMCPBridge` to communicate with the MoonPay CLI (`mp mcp`) over stdio JSON-RPC 2.0, combining live on-chain data with private reasoning.
 
-**MoonPay CLI verified working:**
+**MoonPay CLI installed, authenticated, and LIVE:**
 - **Version:** 1.12.4 (`npm install -g @moonpay/cli`)
 - **Binaries:** `mp` and `moonpay` at `/usr/local/bin/`
-- **MCP Server:** Responds to JSON-RPC 2.0 `initialize` over stdio
+- **Authentication:** Authenticated with wallet created on **17 chains**
+- **MCP Server:** Responds to JSON-RPC 2.0 `initialize` over stdio — **92 tools available**
 - **Tools:** 92 tools across wallets, tokens, swaps, bridges, commerce, prediction markets, virtual accounts
-- **Live API:** Token search, trending, and safety checks return real market data (no auth required)
+- **Live API:** Token search, trending, and safety checks return real market data
 - **Skills:** 20 AI skills for Claude Code (`mp skill list`)
+- **Status:** LIVE integration (authenticated, wallet active, MCP server operational)
 - **Proof:** See [`moonpay_cli_proof.json`](moonpay_cli_proof.json) for full installation and test results
 
 **Privacy model:** VaultGuard never sends raw sensitive data to MoonPay. MoonPay is used only for public on-chain actions (balances, swaps). Private reasoning stays in the `PrivateReasoner` (hashed, in-memory only).
@@ -384,9 +386,10 @@ python3 src/cli_agent.py demo
 
 VaultGuard is deployed on Status Network Sepolia with zero gas fees, enabling free private reasoning session commits.
 
-- **Contract:** [`0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3`](https://sepoliascan.status.network/address/0x51C96F24A3D6aDc6B5bE391b778a847CCFc78Ba3)
+- **Contract:** [`0xDcb6aEdb34b7c91F3b83a0Bf61c7d84DB2f9F2bF`](https://sepoliascan.status.network/address/0xDcb6aEdb34b7c91F3b83a0Bf61c7d84DB2f9F2bF)
+- **Deploy TX:** [`0xaa1b03...`](https://sepoliascan.status.network/tx/0xaa1b031913ad39460ee6638dd0d23eb1904ff0753f2d54bc84503f9f5fa82371)
 - **Chain ID:** 1660990954
-- **RPC:** `https://public.sepolia.status.im`
+- **RPC:** `https://public.sepolia.rpc.status.network`
 - **Gas Price:** 0 (gasless at protocol level -- no ETH needed for transactions)
 - **Explorer:** [sepoliascan.status.network](https://sepoliascan.status.network)
 
