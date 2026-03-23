@@ -100,7 +100,15 @@
     "wallet_list": {
       "command": "mp wallet list --json",
       "result": "SUCCESS",
-      "wallets": []
+      "wallets": [
+        {
+          "name": "vaultguard",
+          "ethereum": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+          "solana": "CrdDpdzSRhpQpKtcpbtP5KDZZeVscNk8TLgc9MNH2X1N",
+          "bitcoin": "bc1qznsss03htaaewt6nejle3cpwx4d9402x3kva7x",
+          "chains": 17
+        }
+      ]
     },
     "skill_list": {
       "command": "mp skill list",
@@ -157,8 +165,23 @@
     "moonpay_status_test": {
       "binary_found": true,
       "version_detected": "1.12.4",
-      "auth_status": "NOT AUTHENTICATED (login required for wallet operations)",
-      "wallets_detected": true
+      "auth_status": "AUTHENTICATED",
+      "user_id": "5286fb3d-fa66-42d6-9dab-0610b53dbab9",
+      "email": "devanshug23@gmail.com",
+      "wallets_detected": true,
+      "wallet_name": "vaultguard",
+      "wallet_addresses": {
+        "ethereum": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "base": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "solana": "CrdDpdzSRhpQpKtcpbtP5KDZZeVscNk8TLgc9MNH2X1N",
+        "bitcoin": "bc1qznsss03htaaewt6nejle3cpwx4d9402x3kva7x",
+        "polygon": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "arbitrum": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "optimism": "0x8FEe5171af08ef70bF6f934C8460Ec0A38EB2424",
+        "tron": "TAJMaGieBLkJa2GavUvUjRbgzWi2GqsZ24",
+        "ton": "UQDap5NRk975hTl8p0PCH2Lqcu8LdUH-fJE6TC_NcoQrXRo9",
+        "filecoin": "f1txc7xqedeo3lkwowyzwv5qtqfqfasqmxek7vpvy"
+      }
     }
   },
 
@@ -169,6 +192,8 @@
     "live_api_calls_work": true,
     "92_tools_available": true,
     "vaultguard_bridge_class_exists": true,
-    "authentication_needed_for": "wallet operations, swaps, bridges (mp login --email <email>)"
+    "authenticated": true,
+    "wallet_created": true,
+    "wallet_addresses_across_17_chains": true
   }
 }
