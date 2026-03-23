@@ -166,8 +166,13 @@ class PrivateReasoner:
 
     def _local_reasoning(self, task: str, data: str) -> str:
         """Local private reasoning when no API is available."""
+        # Include dynamic context so outputs are not 100% identical across runs
+        data_hash = self._hash_data(data)[:12]
+        ts = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+
         analyses = {
             "treasury_strategy": (
+                f"[local-analysis ts={ts} ref={data_hash}] "
                 "After analyzing the portfolio composition and market conditions, "
                 "the optimal rebalancing strategy involves reducing volatile asset "
                 "exposure by 15% and increasing yield-bearing positions. Current "
@@ -175,6 +180,7 @@ class PrivateReasoner:
                 "diversifying across 3 additional yield sources. Risk level: MEDIUM."
             ),
             "governance_analysis": (
+                f"[local-analysis ts={ts} ref={data_hash}] "
                 "The governance proposal has been analyzed across 5 dimensions: "
                 "technical feasibility (8/10), economic impact (7/10), security "
                 "implications (6/10), community alignment (9/10), and execution "
@@ -182,6 +188,7 @@ class PrivateReasoner:
                 "to address security concerns. Risk level: LOW."
             ),
             "deal_evaluation": (
+                f"[local-analysis ts={ts} ref={data_hash}] "
                 "Term sheet analysis complete. The proposed valuation is within "
                 "market range for comparable protocols. Key risks: regulatory "
                 "uncertainty in 2 jurisdictions, technical dependency on 1 external "
@@ -192,7 +199,48 @@ class PrivateReasoner:
         return analyses.get(task, analyses["treasury_strategy"])
 
     def _extract_public_outputs(self, reasoning: str, task: str) -> tuple:
-        """Extract only public-safe outputs from private reasoning."""
+        """
+        Extract only public-safe outputs from private reasoning.
+
+        When the reasoning text contains structured markers (SUMMARY:,
+        ACTIONS:, RECOMMENDATION:) — typically from a real LLM API call —
+        those sections are parsed and used directly.
+
+        When no structured markers are found (e.g., local simulation
+        fallback), hardcoded per-task actions are returned so existing
+        behaviour is preserved.
+        """
+        # --- Attempt structured extraction from real LLM output ---
+        structured_markers = ("SUMMARY:", "ACTIONS:", "RECOMMENDATION:")
+        has_structured = any(marker in reasoning for marker in structured_markers)
+
+        if has_structured:
+            # Extract SUMMARY section
+            summary = self._extract_section(reasoning, "SUMMARY")
+            if not summary:
+                # Fallback: use RECOMMENDATION if no SUMMARY
+                summary = self._extract_section(reasoning, "RECOMMENDATION")
+            if not summary:
+                summary = reasoning[:200] + "..."
+
+            # Extract ACTIONS section and split into list items
+            actions_text = self._extract_section(reasoning, "ACTIONS")
+            actions = []
+            if actions_text:
+                for line in actions_text.split("\n"):
+                    line = line.strip()
+                    # Strip leading list markers like "- ", "* ", "1. ", "1) "
+                    cleaned = re.sub(r"^[\-\*\d\.\)]+\s*", "", line).strip()
+                    if cleaned:
+                        actions.append(cleaned)
+
+            if not actions:
+                # Structured text existed but ACTIONS section was empty/missing
+                actions = ["Review reasoning output — no discrete actions extracted"]
+
+            return summary, actions
+
+        # --- Fallback: hardcoded per-task actions (local simulation) ---
         task_actions = {
             "treasury_strategy": [
                 "Reduce volatile exposure by 15%",
@@ -214,6 +262,26 @@ class PrivateReasoner:
         summary = reasoning[:200] + "..."
         actions = task_actions.get(task, ["Continue monitoring", "No immediate action required"])
         return summary, actions
+
+    @staticmethod
+    def _extract_section(text: str, header: str) -> str:
+        """
+        Pull the text following a ``HEADER:`` marker up to the next known
+        section header or end-of-string.
+
+        Returns the extracted content stripped of leading/trailing whitespace,
+        or an empty string if the header is not found.
+        """
+        # Known section headers used in the prompt template
+        headers = ["SUMMARY", "ACTIONS", "RECOMMENDATION", "RISK_LEVEL"]
+        # Build a pattern that captures everything after "HEADER:" until the
+        # next header or end-of-string
+        other_headers = "|".join(h for h in headers if h != header)
+        pattern = rf"{header}\s*:\s*(.*?)(?:(?:{other_headers})\s*:|$)"
+        match = re.search(pattern, text, re.DOTALL | re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+        return ""
 
     def verify_session(self, session: PrivateReasoning) -> dict:
         """

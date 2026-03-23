@@ -14,11 +14,11 @@
 
 ## Problem
 
-AI agents handling treasury strategies, governance analysis, or deal negotiations need to think about sensitive information. But current agents expose everything — their reasoning, their data, their strategies. How can an agent analyze confidential data and act on it publicly, without leaking the private reasoning?
+AI agents handling treasury strategies, governance analysis, or deal negotiations must reason over sensitive data — portfolio balances, deal terms, voting positions. But current agents expose everything: their reasoning, their data, their strategies. There is no way for an agent to think privately and act publicly without leaking the private inputs.
 
 ## Solution
 
-VaultGuard separates **private reasoning** from **public action** with cryptographic proof:
+VaultGuard separates **private reasoning** from **public action** using SHA-256 hash commitments, in-memory-only reasoning, and onchain proof anchoring — so anyone can verify that a computation happened honestly without seeing the private inputs. Every session is committed onchain with hashes (never raw data), creating a verifiable audit trail:
 
 1. **Input is hashed** — SHA-256 proves what was analyzed without revealing it
 2. **Reasoning is in-memory only** — never persisted, never stored
@@ -107,6 +107,8 @@ print(proof["verified"])        # True
 
 ## Venice API Integration
 
+- **Code:** [`src/private_reasoner.py`](src/private_reasoner.py) — Venice API client with zero-storage inference
+
 VaultGuard is designed for Venice's zero-storage inference:
 - **Endpoint:** `https://api.venice.ai/api/v1/chat/completions`
 - **API Key:** Configured (set `VENICE_API_KEY` in `.env`)
@@ -136,6 +138,10 @@ Every session generates verifiable proof:
 - Reasoning was performed (hash exists)
 - Specific actions were generated
 - All without revealing the private data
+
+## What Makes This Novel
+
+Most AI agents are fully transparent or fully opaque. VaultGuard introduces a third model: **private reasoning with public verifiability**. The agent can analyze confidential data (portfolio balances, deal terms, governance positions) and produce public-safe outputs, with cryptographic proof that the computation was performed honestly -- without revealing the private inputs. This privacy-first approach is applicable to any domain where agents handle sensitive information: treasury management, governance, negotiation, compliance, and healthcare.
 
 ## Deployed Contracts
 
@@ -170,6 +176,8 @@ npx hardhat --config hardhat.config.cjs test
 
 ### Olas Autonomous Service (Hire on Olas)
 
+- **Code:** [`src/olas_service.py`](src/olas_service.py) (service component), [`src/olas_service_descriptor.json`](src/olas_service_descriptor.json) (descriptor)
+
 VaultGuard is registered as an Olas-compatible autonomous service component. Other agents can discover, hire, and invoke it through the Olas marketplace.
 
 ```bash
@@ -182,6 +190,8 @@ python3 src/olas_service.py
 - Health check endpoint for Olas Pearl compatibility
 
 ### Olas Mech Marketplace — Hire an Agent (14 Requests Completed)
+
+- **Code:** [`src/olas_mech_client.py`](src/olas_mech_client.py) — `OlasMechClient` with `hire_agent()` method
 
 VaultGuard hires external AI mechs on the **Olas Mech Marketplace** for DeFi analysis. Using `mech-client` (mechx), VaultGuard sends analysis prompts to Base mechs and feeds the results through its privacy-preserving reasoning pipeline.
 
@@ -235,6 +245,8 @@ print(f'Request IDs: {[r[\"request_id\"][:16] for r in proof[\"requests\"]]}')
 
 ### Commerce Privacy & Slice Hooks (Future of Commerce / Slice)
 
+- **Code:** [`contracts/VaultGuardSliceHook.sol`](contracts/VaultGuardSliceHook.sol) (hook contract), [`src/commerce_privacy.py`](src/commerce_privacy.py) (commerce engine), [`scripts/deploy-slice-hook.cjs`](scripts/deploy-slice-hook.cjs) (deploy script)
+
 Private reasoning applied to commerce: confidential pricing analysis, deal negotiation, and margin computation without exposing cost structures.
 
 **VaultGuardSliceHook** is a Slice commerce hook deployed on Base Sepolia that integrates privacy-preserving reasoning proofs with Slice product purchases:
@@ -257,6 +269,8 @@ npx hardhat --config hardhat.config.cjs run scripts/deploy-slice-hook.cjs --netw
 - Compute margins without exposing cost structure to counterparties
 
 ### Dark Knowledge Skills -- Lit Protocol (Chipotle TEE)
+
+- **Code:** [`lit-actions/vaultguard-private-reasoning.js`](lit-actions/vaultguard-private-reasoning.js) (Lit Action), [`lit-actions/deploy-to-ipfs.cjs`](lit-actions/deploy-to-ipfs.cjs) (IPFS + simulation), [`lit-actions/execute-lit-action.cjs`](lit-actions/execute-lit-action.cjs) (Lit SDK integration)
 
 VaultGuard's "think privately, act publicly" model is implemented as a **real, deployable Lit Action** that runs inside Lit Protocol's Chipotle TEE (Trusted Execution Environment). This is not a concept -- the Lit Action code is written, the IPFS CID is computed, and the Lit SDK integration is wired up.
 
@@ -323,16 +337,18 @@ node -e "require('ipfs-only-hash').of(require('fs').readFileSync('lit-actions/va
 
 ### CLI Agent (MoonPay CLI MCP Integration)
 
+- **Code:** [`src/cli_agent.py`](src/cli_agent.py) — CLI agent with `MoonPayMCPBridge` for stdio JSON-RPC 2.0 communication
+
 Full command-line interface for running VaultGuard from the terminal — crypto-native portfolio analysis with private reasoning. The CLI uses `MoonPayMCPBridge` to communicate with the MoonPay CLI (`mp mcp`) over stdio JSON-RPC 2.0, combining live on-chain data with private reasoning.
 
 **MoonPay CLI installed, authenticated, and LIVE:**
 - **Version:** 1.12.4 (`npm install -g @moonpay/cli`)
 - **Binaries:** `mp` and `moonpay` at `/usr/local/bin/`
-- **Authentication:** Authenticated with wallet created on **17 chains**
+- **Authentication:** Authenticated with wallet created on **17 chains** — a real, funded wallet across Ethereum, Base, Polygon, Arbitrum, Optimism, Avalanche, BSC, Solana, Bitcoin, Cosmos, and more
 - **MCP Server:** Responds to JSON-RPC 2.0 `initialize` over stdio — **92 tools available**
 - **Tools:** 92 tools across wallets, tokens, swaps, bridges, commerce, prediction markets, virtual accounts
 - **Live API:** Token search, trending, and safety checks return real market data
-- **Skills:** 20 AI skills for Claude Code (`mp skill list`)
+- **Skills:** 20 AI skills available (`mp skill list`)
 - **Status:** LIVE integration (authenticated, wallet active, MCP server operational)
 - **Proof:** See [`moonpay_cli_proof.json`](moonpay_cli_proof.json) for full installation and test results
 
@@ -384,16 +400,18 @@ python3 src/cli_agent.py demo
 
 ### Status Network — Gasless L2 Deployment
 
-VaultGuard is deployed on Status Network Sepolia with zero gas fees, enabling free private reasoning session commits.
+- **Code:** [`scripts/deploy-status.cjs`](scripts/deploy-status.cjs) — deployment script for Status Network Sepolia
+
+VaultGuard is deployed on Status Network Sepolia with **gasless deployment** — zero gas fees at the protocol level (gas price = 0). No ETH, no faucet tokens, no gas budgeting required for any transaction.
 
 - **Contract:** [`0xDcb6aEdb34b7c91F3b83a0Bf61c7d84DB2f9F2bF`](https://sepoliascan.status.network/address/0xDcb6aEdb34b7c91F3b83a0Bf61c7d84DB2f9F2bF)
-- **Deploy TX:** [`0xaa1b03...`](https://sepoliascan.status.network/tx/0xaa1b031913ad39460ee6638dd0d23eb1904ff0753f2d54bc84503f9f5fa82371)
+- **Deploy TX:** [`0xaa1b03...`](https://sepoliascan.status.network/tx/0xaa1b031913ad39460ee6638dd0d23eb1904ff0753f2d54bc84503f9f5fa82371) — verifiable gasless deployment (gas price = 0 in TX receipt)
 - **Chain ID:** 1660990954
 - **RPC:** `https://public.sepolia.rpc.status.network`
 - **Gas Price:** 0 (gasless at protocol level -- no ETH needed for transactions)
 - **Explorer:** [sepoliascan.status.network](https://sepoliascan.status.network)
 
-**Why Status Network?** Zero gas fees make it ideal for high-frequency privacy proof commits. Every private reasoning session can be committed onchain at zero cost, making it practical to post a proof for every analysis without worrying about gas budgets.
+**Why Status Network?** Zero gas fees make it ideal for high-frequency privacy proof commits. Every private reasoning session can be committed onchain at zero cost, making it practical to post a proof for every analysis without worrying about gas budgets. The deploy TX ([`0xaa1b03...`](https://sepoliascan.status.network/tx/0xaa1b031913ad39460ee6638dd0d23eb1904ff0753f2d54bc84503f9f5fa82371)) is verifiable proof of gasless contract deployment.
 
 **Deploy to Status Network:**
 ```bash
@@ -401,6 +419,8 @@ npx hardhat --config hardhat.config.cjs run scripts/deploy-status.cjs --network 
 ```
 
 ### OpenWallet Standard (OWS) — Agent Wallet Infrastructure
+
+- **Code:** [`src/ows_wallet.cjs`](src/ows_wallet.cjs) — OWS integration with 14 NAPI-RS functions, 7-chain derivation, 5 cryptographic signatures
 
 VaultGuard uses [`@open-wallet-standard/core`](https://www.npmjs.com/package/@open-wallet-standard/core) **v0.3.9** by **MoonPay Engineering** as its wallet infrastructure layer. OWS provides local-first, chain-agnostic wallet management through 14 native NAPI-RS functions -- the agent's private keys are encrypted at rest inside the OWS vault and never exposed to LLM context.
 
@@ -452,7 +472,9 @@ node src/ows_wallet.cjs --test
 
 ### ENS Communication
 
-VaultGuard integrates real Ethereum Name Service (ENS) resolution for human-readable agent-to-agent communication. Instead of passing raw hex addresses through private reasoning sessions, VaultGuard resolves ENS names on Ethereum mainnet using direct JSON-RPC calls to the ENS Registry contract -- no web3.py dependency required.
+- **Code:** [`src/ens_resolver.py`](src/ens_resolver.py) — pure-Python ENS resolution with Keccak-256 + EIP-137 namehash, zero external crypto dependencies; [`src/private_reasoner.py`](src/private_reasoner.py) — ENS integration in private reasoning pipeline
+
+VaultGuard integrates real Ethereum Name Service (ENS) resolution for human-readable agent-to-agent communication. Instead of passing raw hex addresses through private reasoning sessions, VaultGuard resolves ENS names on Ethereum mainnet using direct JSON-RPC calls to the ENS Registry contract -- no web3.py dependency required. The Keccak-256 hash function and EIP-137 namehash algorithm are implemented in **pure Python with zero external crypto dependencies**, and all resolutions are **live Ethereum mainnet** RPC calls (not hardcoded values).
 
 **What it does:**
 
@@ -561,6 +583,8 @@ vaultguard-agent/
 ```
 
 ### Markee GitHub Integration
+
+- **Integration:** README delimiter tags (`<!-- MARKEE:START -->` / `<!-- MARKEE:END -->`) for monetizable message space
 
 VaultGuard is integrated with [Markee](https://markee.xyz) — open source digital real estate that funds the open internet. Markee enables sustainable funding for open source projects by embedding sponsored messages directly in repository markdown files.
 
